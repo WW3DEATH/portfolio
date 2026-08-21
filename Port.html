@@ -1,1763 +1,879 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Portfolio</title>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        /* Custom styles */
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0a0a0a;
-            color: #ffffff;
-            overflow-x: hidden;
-        }
-        
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'Space Grotesk', sans-serif;
-        }
-        
-        /* AI-themed background */
-        .ai-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            background: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #0a0a0a 70%);
-        }
-        
-        /* Neural network animation */
-        .neural-network {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            opacity: 0.3;
-        }
-        
-        .neuron {
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            background-color: #3b82f6;
-            border-radius: 50%;
-            box-shadow: 0 0 10px #3b82f6, 0 0 20px #3b82f6;
-        }
-        
-        .connection {
-            position: absolute;
-            height: 1px;
-            background-color: rgba(59, 130, 246, 0.3);
-            transform-origin: left center;
-        }
-        
-        /* Scroll animations */
-        .reveal {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.8s ease;
-        }
-        
-        .reveal.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        
-        .reveal-left {
-            opacity: 0;
-            transform: translateX(-50px);
-            transition: all 0.8s ease;
-        }
-        
-        .reveal-left.active {
-            opacity: 1;
-            transform: translateX(0);
-        }
-        
-        .reveal-right {
-            opacity: 0;
-            transform: translateX(50px);
-            transition: all 0.8s ease;
-        }
-        
-        .reveal-right.active {
-            opacity: 1;
-            transform: translateX(0);
-        }
-        
-        /* Glowing button */
-        .glow-btn {
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-        
-        .glow-btn::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: conic-gradient(transparent, rgba(59, 130, 246, 0.3), transparent 30%);
-            animation: rotate 4s linear infinite;
-        }
-        
-        .glow-btn::after {
-            content: '';
-            position: absolute;
-            inset: 2px;
-            background: #171717;
-            border-radius: inherit;
-            z-index: 0;
-        }
-        
-        .glow-btn span {
-            position: relative;
-            z-index: 1;
-        }
-        
-        @keyframes rotate {
-            100% {
-                transform: rotate(1turn);
-            }
-        }
-        
-        /* Card hover effect */
-        .card-hover {
-            transition: all 0.3s ease;
-        }
-        
-        .card-hover:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 40px rgba(59, 130, 246, 0.15);
-        }
-        
-        /* Particle effect */
-        .particle {
-            position: absolute;
-            width: 3px;
-            height: 3px;
-            background-color: #3b82f6;
-            border-radius: 50%;
-            pointer-events: none;
-        }
-        
-        /* Loading animation */
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: #3b82f6;
-            animation: spin 1s ease-in-out infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: #0a0a0a;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: #333;
-            border-radius: 4px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-        
-        /* Toast notification */
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 15px 25px;
-            background-color: #3b82f6;
-            color: white;
-            border-radius: 5px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            z-index: 1000;
-            transform: translateY(100px);
-            opacity: 0;
-            transition: all 0.3s ease;
-        }
-        
-        .toast.show {
-            transform: translateY(0);
-            opacity: 1;
-        }
-        
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: 100;
-            overflow-y: auto;
-        }
-        
-        .modal-content {
-            background-color: #1a1a2e;
-            margin: 5% auto;
-            padding: 30px;
-            border-radius: 8px;
-            width: 80%;
-            max-width: 800px;
-            position: relative;
-            box-shadow: 0 0 30px rgba(59, 130, 246, 0.1);
-        }
-        
-        .close-modal {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            color: #aaa;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        
-        .close-modal:hover {
-            color: #3b82f6;
-        }
-        
-        /* Admin panel styles */
-        .admin-nav {
-            display: flex;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 20px;
-        }
-        
-        .admin-nav-item {
-            padding: 10px 20px;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            transition: all 0.3s ease;
-        }
-        
-        .admin-nav-item.active {
-            border-bottom-color: #3b82f6;
-            color: #3b82f6;
-        }
-        
-        .admin-nav-item:hover {
-            color: #3b82f6;
-        }
-        
-        .admin-tab {
-            display: none;
-        }
-        
-        .admin-tab.active {
-            display: block;
-        }
-        
-        /* Project card */
-        .project-card {
-            background-color: rgba(26, 26, 46, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-        
-        .project-card:hover {
-            border-color: rgba(59, 130, 246, 0.3);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.1);
-        }
-        
-        .project-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-        
-        /* Message card */
-        .message-card {
-            background-color: rgba(26, 26, 46, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 15px;
-            transition: all 0.3s ease;
-        }
-        
-        .message-card:hover {
-            border-color: rgba(59, 130, 246, 0.3);
-        }
-        
-        /* Stat counter */
-        .stat-counter {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #3b82f6;
-            margin-bottom: 5px;
-        }
-        
-        /* Input styles */
-        .form-input {
-            width: 100%;
-            padding: 12px 15px;
-            background-color: rgba(26, 26, 46, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
-            color: white;
-            margin-bottom: 15px;
-            transition: border-color 0.3s ease;
-        }
-        
-        .form-input:focus {
-            outline: none;
-            border-color: #3b82f6;
-        }
-        
-        .form-textarea {
-            width: 100%;
-            padding: 12px 15px;
-            background-color: rgba(26, 26, 46, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
-            color: white;
-            margin-bottom: 15px;
-            resize: vertical;
-            min-height: 120px;
-            transition: border-color 0.3s ease;
-        }
-        
-        .form-textarea:focus {
-            outline: none;
-            border-color: #3b82f6;
-        }
-        
-        /* Button styles */
-        .btn-primary {
-            background-color: #3b82f6;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-        
-        .btn-primary:hover {
-            background-color: #2563eb;
-        }
-        
-        .btn-secondary {
-            background-color: transparent;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-        
-        .btn-secondary:hover {
-            border-color: #3b82f6;
-            color: #3b82f6;
-        }
-        
-        .btn-danger {
-            background-color: #ef4444;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-        
-        .btn-danger:hover {
-            background-color: #dc2626;
-        }
-        
-        /* File input */
-        .file-input {
-            display: none;
-        }
-        
-        .file-label {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: rgba(26, 26, 46, 0.7);
-            border: 1px dashed rgba(255, 255, 255, 0.2);
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 15px;
-        }
-        
-        .file-label:hover {
-            border-color: #3b82f6;
-        }
-        
-        /* Nav styles */
-        .nav-link {
-            color: #9ca3af;
-            transition: color 0.3s ease;
-            position: relative;
-        }
-        
-        .nav-link:hover, .nav-link.active {
-            color: #ffffff;
-        }
-        
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -2px;
-            left: 0;
-            background-color: #3b82f6;
-            transition: width 0.3s ease;
-        }
-        
-        .nav-link:hover::after, .nav-link.active::after {
-            width: 100%;
-        }
-        
-        /* Auth styles */
-        .auth-container {
-            max-width: 400px;
-            margin: 0 auto;
-            padding: 30px;
-            background-color: rgba(26, 26, 46, 0.7);
-            border-radius: 8px;
-            box-shadow: 0 0 30px rgba(59, 130, 246, 0.1);
-        }
-        
-        .auth-tabs {
-            display: flex;
-            margin-bottom: 25px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .auth-tab {
-            flex: 1;
-            padding: 10px;
-            text-align: center;
-            cursor: pointer;
-            color: #9ca3af;
-            transition: color 0.3s ease;
-        }
-        
-        .auth-tab.active {
-            color: #3b82f6;
-            border-bottom: 2px solid #3b82f6;
-        }
-        
-        .auth-tab:hover {
-            color: #ffffff;
-        }
-        
-        .auth-form {
-            display: none;
-        }
-        
-        .auth-form.active {
-            display: block;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEURON DEV — Web Developer Portfolio</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+<style>
+:root{--bg:#0a0a0f;--bg2:#12121a;--card:#16161f;--border:#2a2a3a;--fg:#e8e8ed;--muted:#7a7a8e;--accent:#00e5a0;--accent-dim:rgba(0,229,160,.15);--accent2:#f5a623;--accent2-dim:rgba(245,166,35,.12);--danger:#ef4444}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--accent) var(--bg)}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--fg);overflow-x:hidden;line-height:1.6}
+h1,h2,h3,h4,h5,h6,.fd{font-family:'Space Grotesk',sans-serif}
+#neural-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.reveal{opacity:0;transform:translateY(60px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}
+.reveal.active{opacity:1;transform:translateY(0)}
+.reveal-l{opacity:0;transform:translateX(-80px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}
+.reveal-l.active{opacity:1;transform:translateX(0)}
+.reveal-r{opacity:0;transform:translateX(80px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}
+.reveal-r.active{opacity:1;transform:translateX(0)}
+.reveal-s{opacity:0;transform:scale(.85);transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1)}
+.reveal-s.active{opacity:1;transform:scale(1)}
+.stag .reveal:nth-child(1){transition-delay:.05s}.stag .reveal:nth-child(2){transition-delay:.12s}.stag .reveal:nth-child(3){transition-delay:.19s}.stag .reveal:nth-child(4){transition-delay:.26s}.stag .reveal:nth-child(5){transition-delay:.33s}.stag .reveal:nth-child(6){transition-delay:.4s}.stag .reveal:nth-child(7){transition-delay:.47s}.stag .reveal:nth-child(8){transition-delay:.54s}.stag .reveal:nth-child(9){transition-delay:.61s}
+.glow-line{height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);animation:gp 3s ease-in-out infinite}
+@keyframes gp{0%,100%{opacity:.4;transform:scaleX(.6)}50%{opacity:1;transform:scaleX(1)}}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);animation:of 8s ease-in-out infinite;pointer-events:none}
+.orb-1{width:400px;height:400px;background:var(--accent-dim);top:10%;left:-5%}
+.orb-2{width:300px;height:300px;background:var(--accent2-dim);bottom:5%;right:-5%;animation-delay:-3s}
+.orb-3{width:200px;height:200px;background:rgba(0,229,160,.08);top:50%;left:50%;animation-delay:-5s}
+@keyframes of{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(30px,-20px) scale(1.1)}66%{transform:translate(-20px,15px) scale(.95)}}
+.tc{display:inline-block;width:3px;height:1em;background:var(--accent);margin-left:4px;animation:bl 1s step-end infinite;vertical-align:text-bottom}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:0}}
+.mt{display:flex;animation:mq 30s linear infinite;width:max-content}
+@keyframes mq{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.pc{position:relative;overflow:hidden;border:1px solid var(--border);background:var(--card);border-radius:16px;transition:transform .4s cubic-bezier(.16,1,.3,1),border-color .3s,box-shadow .4s}
+.pc:hover{transform:translateY(-8px);border-color:var(--accent);box-shadow:0 20px 60px -15px rgba(0,229,160,.2)}
+.pc .co{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,10,15,.95) 0%,transparent 60%);opacity:0;transition:opacity .4s;display:flex;align-items:flex-end;padding:24px}
+.pc:hover .co{opacity:1}
+.pc img{transition:transform .6s cubic-bezier(.16,1,.3,1)}
+.pc:hover img{transform:scale(1.08)}
+.fp{padding:8px 20px;border-radius:100px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .3s}
+.fp:hover{border-color:var(--accent);color:var(--fg)}
+.fp.on{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+.sn{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:3rem;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.1}
+.bp{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;background:var(--accent);color:var(--bg);font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;border-radius:12px;border:none;cursor:pointer;transition:all .3s cubic-bezier(.16,1,.3,1);text-decoration:none}
+.bp:hover{transform:translateY(-2px);box-shadow:0 12px 40px -8px rgba(0,229,160,.4)}
+.bp:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+.bs{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;background:transparent;color:var(--fg);font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;border-radius:12px;border:1px solid var(--border);cursor:pointer;transition:all .3s;text-decoration:none}
+.bs:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-2px)}
+.bd{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:var(--danger);color:white;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;border-radius:10px;border:none;cursor:pointer;transition:all .3s}
+.bd:hover{opacity:.85;transform:translateY(-1px)}
+.ng{background:rgba(10,10,15,.75);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(42,42,58,.5);transition:all .3s}
+.ng.sc{background:rgba(10,10,15,.92)}
+.nl{color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;transition:color .3s;position:relative}
+.nl:hover,.nl.al{color:var(--accent)}
+.nl::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;background:var(--accent);transition:width .3s}
+.nl:hover::after,.nl.al::after{width:100%}
+.mb{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+.mb.op{opacity:1;pointer-events:auto}
+.mc{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:32px;max-width:480px;width:90%;transform:translateY(30px) scale(.95);transition:transform .4s cubic-bezier(.16,1,.3,1)}
+.mb.op .mc{transform:translateY(0) scale(1)}
+.toc{position:fixed;top:90px;right:24px;z-index:2000;display:flex;flex-direction:column;gap:10px}
+.toast{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:12px;padding:14px 20px;font-size:14px;color:var(--fg);min-width:280px;animation:ti .4s cubic-bezier(.16,1,.3,1);display:flex;align-items:center;gap:10px}
+.toast.err{border-left-color:var(--danger)}
+.toast.out{animation:too .3s ease forwards}
+@keyframes ti{from{opacity:0;transform:translateX(60px)}to{opacity:1;transform:translateX(0)}}
+@keyframes too{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(60px)}}
+.sbb{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.sbf{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0;transition:width 1.2s cubic-bezier(.16,1,.3,1)}
+#sp{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));z-index:9999;width:0%;transition:width .05s linear}
+.if{width:100%;padding:12px 16px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--fg);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .3s,box-shadow .3s}
+.if:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+.if::placeholder{color:var(--muted)}
+select.if{appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a7a8e' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+.sl{display:inline-flex;align-items:center;gap:8px;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:2px;color:var(--accent);margin-bottom:16px}
+.sl::before{content:'';width:24px;height:2px;background:var(--accent)}
+/* Admin Panel */
+#admin-panel{display:none;min-height:100vh;position:relative;z-index:10}
+.admin-side{width:260px;min-height:100vh;background:#0d0d14;border-right:1px solid var(--border);position:fixed;left:0;top:0;z-index:50;padding-top:20px;transition:transform .3s}
+.admin-main{margin-left:260px;min-height:100vh;padding:30px 36px}
+.as-item{display:flex;align-items:center;gap:12px;padding:12px 20px;color:var(--muted);cursor:pointer;transition:all .2s;font-size:14px;font-weight:500;border-left:3px solid transparent}
+.as-item:hover,.as-item.on{color:var(--accent);background:var(--accent-dim);border-left-color:var(--accent)}
+.as-item i{width:20px;text-align:center}
+.a-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;transition:border-color .3s}
+.a-card:hover{border-color:rgba(0,229,160,.3)}
+.a-table{width:100%;border-collapse:collapse}
+.a-table th{text-align:left;padding:12px 16px;font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);border-bottom:1px solid var(--border);font-family:'Space Grotesk',sans-serif}
+.a-table td{padding:14px 16px;border-bottom:1px solid rgba(42,42,58,.4);font-size:14px;vertical-align:middle}
+.a-table tr:hover td{background:rgba(0,229,160,.03)}
+.prog-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:8px}
+.prog-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .2s;width:0}
+.spin{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.empty-s{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty-s i{font-size:48px;margin-bottom:16px;opacity:.3}
+@media(max-width:768px){
+  .admin-side{transform:translateX(-100%);z-index:60}
+  .admin-side.open{transform:translateX(0)}
+  .admin-main{margin-left:0;padding:20px 16px}
+  .sn{font-size:2.2rem}
+  .hero-t{font-size:2.8rem!important}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.reveal,.reveal-l,.reveal-r,.reveal-s{opacity:1!important;transform:none!important}}
+</style>
 </head>
 <body>
-    <!-- AI Background -->
-    <div class="ai-bg"></div>
-    <div class="neural-network" id="neuralNetwork"></div>
-    
-    <!-- Navigation -->
-    <nav class="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-black/70 border-b border-white/5">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex-shrink-0">
-                    <a href="#" class="text-xl font-bold text-white">
-                        <span class="text-blue-500">AI</span> Portfolio
-                    </a>
-                </div>
-                <div class="hidden md:block">
-                    <div class="ml-10 flex items-center space-x-4">
-                        <a href="#home" class="nav-link active px-3 py-2 text-sm font-medium">Home</a>
-                        <a href="#about" class="nav-link px-3 py-2 text-sm font-medium">About</a>
-                        <a href="#creations" class="nav-link px-3 py-2 text-sm font-medium">Creations</a>
-                        <a href="#contact" class="nav-link px-3 py-2 text-sm font-medium">Contact</a>
-                        <div id="authButtons">
-                            <button id="loginBtn" class="btn-primary ml-4">Login</button>
-                        </div>
-                        <div id="userMenu" class="hidden">
-                            <div class="relative group">
-                                <button class="flex items-center space-x-2 text-sm">
-                                    <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
-                                        <span id="userInitials" class="text-white text-xs font-bold">U</span>
-                                    </div>
-                                    <span id="userName" class="text-gray-300">User</span>
-                                </button>
-                                <div class="absolute right-0 w-48 mt-2 bg-gray-900 rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
-                                    <a href="#" id="profileBtn" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800">Profile</a>
-                                    <a href="#" id="adminBtn" class="hidden block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800">Admin Panel</a>
-                                    <a href="#" id="logoutBtn" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800">Logout</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="md:hidden">
-                    <button id="mobileMenuBtn" class="text-gray-400 hover:text-white focus:outline-none">
-                        <i class="fas fa-bars text-xl"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-        <!-- Mobile menu -->
-        <div id="mobileMenu" class="hidden md:hidden bg-black/90 border-t border-white/5">
-            <div class="px-4 py-3 space-y-3">
-                <a href="#home" class="block text-gray-300 hover:text-white py-2">Home</a>
-                <a href="#about" class="block text-gray-300 hover:text-white py-2">About</a>
-                <a href="#creations" class="block text-gray-300 hover:text-white py-2">Creations</a>
-                <a href="#contact" class="block text-gray-300 hover:text-white py-2">Contact</a>
-                <div id="mobileAuthButtons">
-                    <button id="mobileLoginBtn" class="btn-primary w-full mt-2">Login</button>
-                </div>
-                <div id="mobileUserMenu" class="hidden">
-                    <div class="flex items-center space-x-3 py-2">
-                        <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
-                            <span class="text-white text-xs font-bold">U</span>
-                        </div>
-                        <span class="text-gray-300">User</span>
-                    </div>
-                    <a href="#" id="mobileProfileBtn" class="block text-gray-300 hover:text-white py-2">Profile</a>
-                    <a href="#" id="mobileAdminBtn" class="hidden block text-gray-300 hover:text-white py-2">Admin Panel</a>
-                    <a href="#" id="mobileLogoutBtn" class="block text-gray-300 hover:text-white py-2">Logout</a>
-                </div>
-            </div>
-        </div>
-    </nav>
-    
-    <!-- Hero Section -->
-    <section id="home" class="min-h-screen flex items-center justify-center pt-16">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="reveal">
-                <div class="inline-block mb-6 px-4 py-2 rounded-full border border-blue-500/30 bg-blue-500/10">
-                    <span class="text-blue-400 text-sm font-medium">AI-Powered Portfolio</span>
-                </div>
-            </div>
-            <h1 class="reveal text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight">
-                Crafting Digital Experiences with <span class="text-blue-500">AI</span>
-            </h1>
-            <p class="reveal text-lg text-gray-400 mb-10 max-w-2xl mx-auto">
-                Explore my portfolio of innovative web development projects enhanced with artificial intelligence. Each creation is designed to push the boundaries of what's possible.
-            </p>
-            <div class="reveal flex flex-col sm:flex-row justify-center gap-4">
-                <a href="#creations" class="glow-btn rounded-lg px-8 py-4 text-white font-medium">
-                    <span>View Creations</span>
-                </a>
-                <a href="#contact" class="btn-secondary rounded-lg px-8 py-4">
-                    Get In Touch
-                </a>
-            </div>
-            <div class="reveal mt-16">
-                <div class="animate-bounce text-gray-500">
-                    <i class="fas fa-chevron-down text-xl"></i>
-                </div>
-            </div>
-        </div>
-    </section>
-    
-    <!-- About Section -->
-    <section id="about" class="py-20">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="reveal text-3xl md:text-4xl font-bold mb-4">About Me</h2>
-                <div class="reveal w-20 h-1 bg-blue-500 mx-auto"></div>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-                <div class="reveal-left">
-                    <h3 class="text-2xl font-bold mb-6">Web Developer & AI Enthusiast</h3>
-                    <p class="text-gray-400 mb-6">
-                        I'm a passionate web developer with a keen interest in artificial intelligence and its applications in creating interactive, user-centric digital experiences. My focus is on building responsive, performant websites that leverage AI to provide unique functionalities.
-                    </p>
-                    <p class="text-gray-400 mb-8">
-                        With expertise in modern web technologies and AI integration, I create solutions that are not only visually appealing but also intelligent and adaptive to user needs.
-                    </p>
-                    <div class="flex space-x-4">
-                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-blue-500 hover:text-white transition-all">
-                            <i class="fab fa-github"></i>
-                        </a>
-                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-blue-500 hover:text-white transition-all">
-                            <i class="fab fa-linkedin-in"></i>
-                        </a>
-                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-blue-500 hover:text-white transition-all">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                    </div>
-                </div>
-                
-                <div class="reveal-right">
-                    <div class="grid grid-cols-2 gap-6">
-                        <div class="bg-gray-900/50 rounded-lg p-6 border border-white/5">
-                            <div class="stat-counter" id="projectsCount">0</div>
-                            <div class="text-gray-400">Projects</div>
-                        </div>
-                        <div class="bg-gray-900/50 rounded-lg p-6 border border-white/5">
-                            <div class="stat-counter" id="clientsCount">0</div>
-                            <div class="text-gray-400">Clients</div>
-                        </div>
-                        <div class="bg-gray-900/50 rounded-lg p-6 border border-white/5">
-                            <div class="stat-counter" id="yearsCount">0</div>
-                            <div class="text-gray-400">Years Experience</div>
-                        </div>
-                        <div class="bg-gray-900/50 rounded-lg p-6 border border-white/5">
-                            <div class="stat-counter" id="technologiesCount">12</div>
-                            <div class="text-gray-400">Technologies</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Creations Section -->
-    <section id="creations" class="py-20 bg-black/30">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="reveal text-3xl md:text-4xl font-bold mb-4">My Creations</h2>
-                <div class="reveal w-20 h-1 bg-blue-500 mx-auto mb-6"></div>
-                <p class="reveal text-gray-400 max-w-2xl mx-auto">
-                    Explore my portfolio of innovative web development projects enhanced with artificial intelligence.
-                </p>
-            </div>
-            
-            <div id="projectsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Projects will be loaded here -->
-                <div class="col-span-full text-center py-10">
-                    <div class="loading mx-auto mb-4"></div>
-                    <p class="text-gray-400">Loading projects...</p>
-                </div>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Contact Section -->
-    <section id="contact" class="py-20">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="reveal text-3xl md:text-4xl font-bold mb-4">Get In Touch</h2>
-                <div class="reveal w-20 h-1 bg-blue-500 mx-auto mb-6"></div>
-                <p class="reveal text-gray-400 max-w-2xl mx-auto">
-                    Have a project in mind or want to collaborate? Feel free to reach out.
-                </p>
-            </div>
-            
-            <div class="reveal">
-                <form id="contactForm" class="bg-gray-900/50 rounded-lg p-8 border border-white/5">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        <div>
-                            <label for="name" class="block text-sm font-medium text-gray-400 mb-2">Name</label>
-                            <input type="text" id="name" name="name" class="form-input" required>
-                        </div>
-                        <div>
-                            <label for="email" class="block text-sm font-medium text-gray-400 mb-2">Email</label>
-                            <input type="email" id="email" name="email" class="form-input" required>
-                        </div>
-                    </div>
-                    <div class="mb-6">
-                        <label for="subject" class="block text-sm font-medium text-gray-400 mb-2">Subject</label>
-                        <input type="text" id="subject" name="subject" class="form-input" required>
-                    </div>
-                    <div class="mb-6">
-                        <label for="message" class="block text-sm font-medium text-gray-400 mb-2">Message</label>
-                        <textarea id="message" name="message" class="form-textarea" required></textarea>
-                    </div>
-                    <div class="text-center">
-                        <button type="submit" class="btn-primary px-8 py-3">
-                            Send Message
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Footer -->
-    <footer class="py-8 border-t border-white/5">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-4 md:mb-0">
-                    <a href="#" class="text-xl font-bold text-white">
-                        <span class="text-blue-500">AI</span> Portfolio
-                    </a>
-                </div>
-                <div class="flex space-x-6 mb-4 md:mb-0">
-                    <a href="#home" class="text-gray-400 hover:text-white transition-colors">Home</a>
-                    <a href="#about" class="text-gray-400 hover:text-white transition-colors">About</a>
-                    <a href="#creations" class="text-gray-400 hover:text-white transition-colors">Creations</a>
-                    <a href="#contact" class="text-gray-400 hover:text-white transition-colors">Contact</a>
-                </div>
-                <div class="text-gray-500 text-sm">
-                    &copy; 2023 AI Portfolio. All rights reserved.
-                </div>
-            </div>
-        </div>
-    </footer>
-    
-    <!-- Auth Modal -->
-    <div id="authModal" class="modal">
-        <div class="modal-content max-w-md">
-            <span class="close-modal">&times;</span>
-            <h2 class="text-2xl font-bold mb-6 text-center">Welcome</h2>
-            
-            <div class="auth-tabs">
-                <div class="auth-tab active" data-tab="login">Login</div>
-                <div class="auth-tab" data-tab="signup">Sign Up</div>
-            </div>
-            
-            <form id="loginForm" class="auth-form active">
-                <div class="mb-4">
-                    <label for="loginEmail" class="block text-sm font-medium text-gray-400 mb-2">Email</label>
-                    <input type="email" id="loginEmail" class="form-input" required>
-                </div>
-                <div class="mb-6">
-                    <label for="loginPassword" class="block text-sm font-medium text-gray-400 mb-2">Password</label>
-                    <input type="password" id="loginPassword" class="form-input" required>
-                </div>
-                <button type="submit" class="btn-primary w-full py-3">Login</button>
-            </form>
-            
-            <form id="signupForm" class="auth-form">
-                <div class="mb-4">
-                    <label for="signupName" class="block text-sm font-medium text-gray-400 mb-2">Name</label>
-                    <input type="text" id="signupName" class="form-input" required>
-                </div>
-                <div class="mb-4">
-                    <label for="signupEmail" class="block text-sm font-medium text-gray-400 mb-2">Email</label>
-                    <input type="email" id="signupEmail" class="form-input" required>
-                </div>
-                <div class="mb-6">
-                    <label for="signupPassword" class="block text-sm font-medium text-gray-400 mb-2">Password</label>
-                    <input type="password" id="signupPassword" class="form-input" required>
-                </div>
-                <button type="submit" class="btn-primary w-full py-3">Sign Up</button>
-            </form>
-        </div>
+<div id="sp"></div>
+<canvas id="neural-canvas"></canvas>
+<div class="toc" id="toc"></div>
+
+<!-- NAV -->
+<nav class="ng fixed top-0 left-0 w-full z-50" id="nav">
+  <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+    <a href="#" class="fd font-bold text-xl tracking-tight flex items-center gap-2" style="color:var(--fg)" onclick="goPublic();return false;">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="12" stroke="var(--accent)" stroke-width="2"/><circle cx="14" cy="14" r="4" fill="var(--accent)"/><line x1="14" y1="2" x2="14" y2="10" stroke="var(--accent)" stroke-width="1.5"/><line x1="14" y1="18" x2="14" y2="26" stroke="var(--accent)" stroke-width="1.5"/><line x1="2" y1="14" x2="10" y2="14" stroke="var(--accent)" stroke-width="1.5"/><line x1="18" y1="14" x2="26" y2="14" stroke="var(--accent)" stroke-width="1.5"/></svg>
+      NEURON DEV
+    </a>
+    <div class="hidden md:flex items-center gap-8" id="pub-nav">
+      <a href="#about" class="nl">About</a>
+      <a href="#portfolio" class="nl">Portfolio</a>
+      <a href="#contact" class="nl">Contact</a>
     </div>
-    
-    <!-- Admin Panel Modal -->
-    <div id="adminModal" class="modal">
-        <div class="modal-content max-w-4xl">
-            <span class="close-modal">&times;</span>
-            <h2 class="text-2xl font-bold mb-6">Admin Panel</h2>
-            
-            <div class="admin-nav">
-                <div class="admin-nav-item active" data-tab="projects">Projects</div>
-                <div class="admin-nav-item" data-tab="messages">Messages</div>
-                <div class="admin-nav-item" data-tab="stats">Stats</div>
-                <div class="admin-nav-item" data-tab="settings">Settings</div>
-            </div>
-            
-            <!-- Projects Tab -->
-            <div id="projectsTab" class="admin-tab active">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-bold">Projects</h3>
-                    <button id="addProjectBtn" class="btn-primary">
-                        <i class="fas fa-plus mr-2"></i>Add Project
-                    </button>
-                </div>
-                
-                <div id="projectsList" class="space-y-4">
-                    <!-- Projects will be loaded here -->
-                </div>
-                
-                <!-- Add/Edit Project Form -->
-                <div id="projectForm" class="hidden mt-8 bg-gray-900/50 rounded-lg p-6 border border-white/5">
-                    <h3 id="projectFormTitle" class="text-xl font-bold mb-6">Add New Project</h3>
-                    <form id="addProjectForm">
-                        <div class="mb-4">
-                            <label for="projectTitle" class="block text-sm font-medium text-gray-400 mb-2">Title</label>
-                            <input type="text" id="projectTitle" class="form-input" required>
-                        </div>
-                        <div class="mb-4">
-                            <label for="projectDescription" class="block text-sm font-medium text-gray-400 mb-2">Description</label>
-                            <textarea id="projectDescription" class="form-textarea" required></textarea>
-                        </div>
-                        <div class="mb-4">
-                            <label for="projectTechnologies" class="block text-sm font-medium text-gray-400 mb-2">Technologies (comma separated)</label>
-                            <input type="text" id="projectTechnologies" class="form-input" required>
-                        </div>
-                        <div class="mb-4">
-                            <label for="projectLink" class="block text-sm font-medium text-gray-400 mb-2">Project Link</label>
-                            <input type="url" id="projectLink" class="form-input">
-                        </div>
-                        <div class="mb-4">
-                            <label for="projectImage" class="block text-sm font-medium text-gray-400 mb-2">Project Image</label>
-                            <input type="file" id="projectImage" class="file-input" accept="image/*">
-                            <label for="projectImage" class="file-label">
-                                <i class="fas fa-cloud-upload-alt mr-2"></i>Choose Image
-                            </label>
-                            <div id="imagePreview" class="mt-2 hidden">
-                                <img id="previewImg" src="" alt="Preview" class="max-h-40 rounded">
-                            </div>
-                        </div>
-                        <div class="flex space-x-4">
-                            <button type="submit" class="btn-primary">
-                                <i class="fas fa-save mr-2"></i>Save Project
-                            </button>
-                            <button type="button" id="cancelProjectBtn" class="btn-secondary">Cancel</button>
-                        </div>
-                        <input type="hidden" id="projectId" value="">
-                    </form>
-                </div>
-            </div>
-            
-            <!-- Messages Tab -->
-            <div id="messagesTab" class="admin-tab">
-                <h3 class="text-xl font-bold mb-6">Messages</h3>
-                <div id="messagesList">
-                    <!-- Messages will be loaded here -->
-                </div>
-            </div>
-            
-            <!-- Stats Tab -->
-            <div id="statsTab" class="admin-tab">
-                <h3 class="text-xl font-bold mb-6">Website Stats</h3>
-                <form id="statsForm" class="bg-gray-900/50 rounded-lg p-6 border border-white/5">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label for="clientsInput" class="block text-sm font-medium text-gray-400 mb-2">Number of Clients</label>
-                            <input type="number" id="clientsInput" class="form-input" min="0">
-                        </div>
-                        <div>
-                            <label for="yearsInput" class="block text-sm font-medium text-gray-400 mb-2">Years of Experience</label>
-                            <input type="number" id="yearsInput" class="form-input" min="0">
-                        </div>
-                    </div>
-                    <div class="mt-6">
-                        <button type="submit" class="btn-primary">
-                            <i class="fas fa-save mr-2"></i>Save Stats
-                        </button>
-                    </div>
-                </form>
-            </div>
-            
-            <!-- Settings Tab -->
-            <div id="settingsTab" class="admin-tab">
-                <h3 class="text-xl font-bold mb-6">Website Settings</h3>
-                <form id="settingsForm" class="bg-gray-900/50 rounded-lg p-6 border border-white/5">
-                    <div class="mb-4">
-                        <label for="heroTitle" class="block text-sm font-medium text-gray-400 mb-2">Hero Title</label>
-                        <input type="text" id="heroTitle" class="form-input">
-                    </div>
-                    <div class="mb-4">
-                        <label for="heroSubtitle" class="block text-sm font-medium text-gray-400 mb-2">Hero Subtitle</label>
-                        <textarea id="heroSubtitle" class="form-textarea"></textarea>
-                    </div>
-                    <div class="mb-4">
-                        <label for="aboutText" class="block text-sm font-medium text-gray-400 mb-2">About Text</label>
-                        <textarea id="aboutText" class="form-textarea" rows="6"></textarea>
-                    </div>
-                    <div class="mt-6">
-                        <button type="submit" class="btn-primary">
-                            <i class="fas fa-save mr-2"></i>Save Settings
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+    <div class="flex items-center gap-3">
+      <button class="bs text-sm py-2.5 px-4 hidden" id="btn-admin" onclick="goAdmin()"><i class="fa-solid fa-lock"></i> Admin</button>
+      <button class="bp text-sm py-2.5 px-5" id="btn-login" onclick="openLogin()"><i class="fa-solid fa-right-to-bracket"></i> Login</button>
+      <button class="bs text-sm py-2.5 px-4 hidden" id="btn-logout" onclick="doLogout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+      <button class="hidden" id="btn-ham" onclick="toggleSide()" style="background:none;border:none;color:var(--fg);font-size:20px;cursor:pointer;"><i class="fa-solid fa-bars"></i></button>
     </div>
-    
-    <!-- Toast Notification -->
-    <div id="toast" class="toast"></div>
-    
-    <script>
-        // Initialize Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyCQfez99YicEihjHJc1SSatxHtRQSeKAUY",
-            authDomain: "marketspot-e44b4.firebaseapp.com",
-            databaseURL: "https://marketspot-e44b4-default-rtdb.firebaseio.com",
-            projectId: "marketspot-e44b4",
-            storageBucket: "marketspot-e44b4.firebasestorage.app",
-            messagingSenderId: "775423662696",
-            appId: "1:775423662696:web:a6050d49843b0563bdf9dd",
-            measurementId: "G-H0P21TSB1X"
-        };
-        
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        const storage = firebase.storage();
-        
-        // DOM Elements
-        const loginBtn = document.getElementById('loginBtn');
-        const mobileLoginBtn = document.getElementById('mobileLoginBtn');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
-        const authModal = document.getElementById('authModal');
-        const adminModal = document.getElementById('adminModal');
-        const adminBtn = document.getElementById('adminBtn');
-        const mobileAdminBtn = document.getElementById('mobileAdminBtn');
-        const loginForm = document.getElementById('loginForm');
-        const signupForm = document.getElementById('signupForm');
-        const contactForm = document.getElementById('contactForm');
-        const projectsGrid = document.getElementById('projectsGrid');
-        const projectsList = document.getElementById('projectsList');
-        const messagesList = document.getElementById('messagesList');
-        const addProjectBtn = document.getElementById('addProjectBtn');
-        const projectForm = document.getElementById('projectForm');
-        const addProjectForm = document.getElementById('addProjectForm');
-        const cancelProjectBtn = document.getElementById('cancelProjectBtn');
-        const statsForm = document.getElementById('statsForm');
-        const settingsForm = document.getElementById('settingsForm');
-        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        const mobileMenu = document.getElementById('mobileMenu');
-        const toast = document.getElementById('toast');
-        
-        // Variables
-        let currentUser = null;
-        let isAdmin = false;
-        let editingProjectId = null;
-        
-        // Initialize Neural Network Animation
-        function initNeuralNetwork() {
-            const container = document.getElementById('neuralNetwork');
-            const neurons = [];
-            const numNeurons = 30;
-            
-            // Create neurons
-            for (let i = 0; i < numNeurons; i++) {
-                const neuron = document.createElement('div');
-                neuron.className = 'neuron';
-                neuron.style.left = `${Math.random() * 100}%`;
-                neuron.style.top = `${Math.random() * 100}%`;
-                container.appendChild(neuron);
-                neurons.push({
-                    element: neuron,
-                    x: parseFloat(neuron.style.left),
-                    y: parseFloat(neuron.style.top),
-                    vx: (Math.random() - 0.5) * 0.02,
-                    vy: (Math.random() - 0.5) * 0.02
-                });
-            }
-            
-            // Create connections
-            const connections = [];
-            for (let i = 0; i < numNeurons; i++) {
-                for (let j = i + 1; j < numNeurons; j++) {
-                    const connection = document.createElement('div');
-                    connection.className = 'connection';
-                    container.appendChild(connection);
-                    connections.push({
-                        element: connection,
-                        from: i,
-                        to: j
-                    });
-                }
-            }
-            
-            // Animation loop
-            function animate() {
-                // Update neuron positions
-                neurons.forEach(neuron => {
-                    neuron.x += neuron.vx;
-                    neuron.y += neuron.vy;
-                    
-                    // Bounce off edges
-                    if (neuron.x < 0 || neuron.x > 100) neuron.vx *= -1;
-                    if (neuron.y < 0 || neuron.y > 100) neuron.vy *= -1;
-                    
-                    neuron.element.style.left = `${neuron.x}%`;
-                    neuron.element.style.top = `${neuron.y}%`;
-                });
-                
-                // Update connections
-                connections.forEach(connection => {
-                    const fromNeuron = neurons[connection.from];
-                    const toNeuron = neurons[connection.to];
-                    
-                    const dx = (toNeuron.x - fromNeuron.x) * window.innerWidth / 100;
-                    const dy = (toNeuron.y - fromNeuron.y) * window.innerHeight / 100;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    
-                    if (distance < 200) {
-                        const angle = Math.atan2(dy, dx);
-                        connection.element.style.width = `${distance}px`;
-                        connection.element.style.left = `${fromNeuron.x * window.innerWidth / 100}px`;
-                        connection.element.style.top = `${fromNeuron.y * window.innerHeight / 100}px`;
-                        connection.element.style.transform = `rotate(${angle}rad)`;
-                        connection.element.style.opacity = 1 - distance / 200;
-                    } else {
-                        connection.element.style.opacity = 0;
-                    }
-                });
-                
-                requestAnimationFrame(animate);
-            }
-            
-            animate();
-        }
-        
-        // Scroll Reveal Animation
-        function initScrollReveal() {
-            const reveals = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
-            
-            window.addEventListener('scroll', () => {
-                const scrollPosition = window.scrollY;
-                
-                reveals.forEach(reveal => {
-                    const elementTop = reveal.offsetTop;
-                    const elementHeight = reveal.offsetHeight;
-                    
-                    if (scrollPosition > elementTop - window.innerHeight + elementHeight / 3) {
-                        reveal.classList.add('active');
-                    }
-                });
-            });
-            
-            // Trigger initial check
-            window.dispatchEvent(new Event('scroll'));
-        }
-        
-        // Smooth Scroll
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                const targetId = this.getAttribute('href');
-                const targetElement = document.querySelector(targetId);
-                
-                if (targetElement) {
-                    window.scrollTo({
-                        top: targetElement.offsetTop - 70,
-                        behavior: 'smooth'
-                    });
-                    
-                    // Close mobile menu if open
-                    mobileMenu.classList.add('hidden');
-                }
-            });
+  </div>
+</nav>
+
+<!-- ============ PUBLIC PORTFOLIO ============ -->
+<div id="pub-site">
+  <header class="relative min-h-screen flex items-center justify-center overflow-hidden" id="hero">
+    <div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+    <div class="relative z-10 max-w-5xl mx-auto px-6 text-center">
+      <div class="sl justify-center mb-6 reveal" style="transition-delay:.1s">Web Developer & AI Creator</div>
+      <h1 class="fd font-bold leading-none mb-6 reveal hero-t" style="font-size:clamp(2.8rem,7vw,5.5rem);transition-delay:.2s">
+        Where Code Meets<br><span style="color:var(--accent)">Creative</span> <span id="tw"></span><span class="tc"></span>
+      </h1>
+      <p class="text-lg md:text-xl max-w-2xl mx-auto mb-10 reveal" style="color:var(--muted);transition-delay:.35s">
+        Building high-performance websites, web applications, and AI-powered experiences that leave a lasting impression.
+      </p>
+      <div class="flex flex-wrap items-center justify-center gap-4 reveal" style="transition-delay:.5s">
+        <a href="#portfolio" class="bp text-base"><i class="fa-solid fa-eye"></i> View Portfolio</a>
+        <a href="#contact" class="bs text-base"><i class="fa-solid fa-paper-plane"></i> Get in Touch</a>
+      </div>
+      <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 reveal" style="transition-delay:.7s">
+        <span class="text-xs" style="color:var(--muted)">Scroll to explore</span>
+        <div style="width:24px;height:40px;border:2px solid var(--border);border-radius:12px;display:flex;justify-content:center;padding-top:8px">
+          <div style="width:3px;height:8px;background:var(--accent);border-radius:2px;animation:sd 2s ease-in-out infinite"></div>
+        </div>
+      </div>
+    </div>
+  </header>
+  <style>@keyframes sd{0%,100%{transform:translateY(0);opacity:1}50%{transform:translateY(10px);opacity:.3}}</style>
+
+  <div class="relative z-10 py-6 overflow-hidden" style="border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+    <div class="mt"><span class="flex items-center gap-12 px-6 fd text-sm font-medium" style="color:var(--muted)">
+      <span>REACT</span><span style="color:var(--accent)">&#9670;</span><span>NEXT.JS</span><span style="color:var(--accent)">&#9670;</span><span>NODE.JS</span><span style="color:var(--accent)">&#9670;</span><span>PYTHON</span><span style="color:var(--accent)">&#9670;</span><span>FIREBASE</span><span style="color:var(--accent)">&#9670;</span><span>TAILWIND CSS</span><span style="color:var(--accent)">&#9670;</span><span>POSTGRESQL</span><span style="color:var(--accent)">&#9670;</span><span>THREE.JS</span><span style="color:var(--accent)">&#9670;</span>
+      <span>REACT</span><span style="color:var(--accent)">&#9670;</span><span>NEXT.JS</span><span style="color:var(--accent)">&#9670;</span><span>NODE.JS</span><span style="color:var(--accent)">&#9670;</span><span>PYTHON</span><span style="color:var(--accent)">&#9670;</span><span>FIREBASE</span><span style="color:var(--accent)">&#9670;</span><span>TAILWIND CSS</span><span style="color:var(--accent)">&#9670;</span><span>POSTGRESQL</span><span style="color:var(--accent)">&#9670;</span><span>THREE.JS</span><span style="color:var(--accent)">&#9670;</span>
+    </span></div>
+  </div>
+
+  <!-- ABOUT -->
+  <section id="about" class="relative z-10 py-28">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+        <div>
+          <div class="sl reveal-l">About Me</div>
+          <h2 class="fd font-bold text-4xl md:text-5xl mb-6 reveal-l" style="transition-delay:.1s">Crafting digital experiences with <span style="color:var(--accent)">precision</span></h2>
+          <p class="mb-6 reveal-l" style="color:var(--muted);transition-delay:.15s">Full-stack web developer with 5+ years of experience building scalable applications, interactive interfaces, and AI-integrated platforms. I turn complex requirements into elegant, performant solutions.</p>
+          <p class="mb-8 reveal-l" style="color:var(--muted);transition-delay:.2s">From startup MVPs to enterprise dashboards, every project gets the same obsessive attention to detail, performance optimization, and user experience polish.</p>
+          <div class="space-y-5 reveal-l" style="transition-delay:.25s" id="skills-c">
+            <div><div class="flex justify-between mb-2 text-sm"><span class="font-medium">Frontend: React, Next.js, Vue, TypeScript</span><span style="color:var(--accent)">95%</span></div><div class="sbb"><div class="sbf" data-w="95"></div></div></div>
+            <div><div class="flex justify-between mb-2 text-sm"><span class="font-medium">Backend: Node.js, Python, Go, REST/GraphQL</span><span style="color:var(--accent)">90%</span></div><div class="sbb"><div class="sbf" data-w="90"></div></div></div>
+            <div><div class="flex justify-between mb-2 text-sm"><span class="font-medium">Database: PostgreSQL, MongoDB, Firebase</span><span style="color:var(--accent)">88%</span></div><div class="sbb"><div class="sbf" data-w="88"></div></div></div>
+            <div><div class="flex justify-between mb-2 text-sm"><span class="font-medium">UI/UX & Creative: Figma, Three.js, Motion</span><span style="color:var(--accent)">82%</span></div><div class="sbb"><div class="sbf" data-w="82"></div></div></div>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-5 stag" id="stats-grid">
+          <div class="reveal p-6 rounded-2xl" style="background:var(--card);border:1px solid var(--border)"><div class="sn" data-t="0" id="stat-proj">0</div><p class="mt-2 text-sm" style="color:var(--muted)">Projects Delivered</p></div>
+          <div class="reveal p-6 rounded-2xl" style="background:var(--card);border:1px solid var(--border)"><div class="sn" data-t="12">0</div><p class="mt-2 text-sm" style="color:var(--muted)">Tech Stack</p></div>
+          <div class="reveal p-6 rounded-2xl" style="background:var(--card);border:1px solid var(--border)"><div class="sn" data-t="38">0</div><p class="mt-2 text-sm" style="color:var(--muted)">Happy Clients</p></div>
+          <div class="reveal p-6 rounded-2xl" style="background:var(--card);border:1px solid var(--border)"><div class="sn" data-t="5">0</div><p class="mt-2 text-sm" style="color:var(--muted)">Years Experience</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="glow-line max-w-4xl mx-auto"></div>
+
+  <!-- PORTFOLIO -->
+  <section id="portfolio" class="relative z-10 py-28">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center mb-14">
+        <div class="sl justify-center reveal">Portfolio</div>
+        <h2 class="fd font-bold text-4xl md:text-5xl mb-4 reveal" style="transition-delay:.1s">Featured <span style="color:var(--accent)">Projects</span></h2>
+        <p class="max-w-xl mx-auto reveal" style="color:var(--muted);transition-delay:.15s">A showcase of websites, web apps, and digital experiences built with modern technologies.</p>
+      </div>
+      <div class="flex flex-wrap justify-center gap-3 mb-12 reveal" style="transition-delay:.2s" id="fbar">
+        <button class="fp on" data-f="all">All</button>
+        <button class="fp" data-f="websites">Websites</button>
+        <button class="fp" data-f="webapps">Web Apps</button>
+        <button class="fp" data-f="dashboards">Dashboards</button>
+        <button class="fp" data-f="ecommerce">E-Commerce</button>
+        <button class="fp" data-f="landing">Landing Pages</button>
+      </div>
+      <div id="p-grid-wrap">
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 stag" id="p-grid"></div>
+        <div class="empty-s hidden" id="p-empty"><i class="fa-solid fa-folder-open block"></i><p class="text-lg font-medium mb-1">No projects yet</p><p class="text-sm">Projects will appear here once the admin uploads them.</p></div>
+        <div class="flex justify-center py-10" id="p-load"><div class="spin"></div></div>
+      </div>
+    </div>
+  </section>
+  <div class="glow-line max-w-4xl mx-auto"></div>
+
+  <!-- CONTACT -->
+  <section id="contact" class="relative z-10 py-28">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="grid lg:grid-cols-2 gap-16">
+        <div>
+          <div class="sl reveal-l">Get in Touch</div>
+          <h2 class="fd font-bold text-4xl md:text-5xl mb-6 reveal-l" style="transition-delay:.1s">Let's build something <span style="color:var(--accent)">remarkable</span></h2>
+          <p class="mb-10 reveal-l" style="color:var(--muted);transition-delay:.15s">Have a project in mind? I'd love to hear about it. Send me a message and let's create something extraordinary together.</p>
+          <div class="space-y-5 reveal-l" style="transition-delay:.2s">
+            <a href="mailto:hello@neurondev.com" class="flex items-center gap-4 group" style="color:var(--fg);text-decoration:none"><div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background:var(--accent-dim)"><i class="fa-solid fa-envelope" style="color:var(--accent)"></i></div><div><p class="text-xs" style="color:var(--muted)">Email</p><p class="font-medium group-hover:text-[var(--accent)] transition-colors">hello@neurondev.com</p></div></a>
+            <a href="#" class="flex items-center gap-4 group" style="color:var(--fg);text-decoration:none"><div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background:var(--accent-dim)"><i class="fa-brands fa-github" style="color:var(--accent)"></i></div><div><p class="text-xs" style="color:var(--muted)">GitHub</p><p class="font-medium group-hover:text-[var(--accent)] transition-colors">github.com/neurondev</p></div></a>
+            <a href="#" class="flex items-center gap-4 group" style="color:var(--fg);text-decoration:none"><div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background:var(--accent-dim)"><i class="fa-brands fa-linkedin" style="color:var(--accent)"></i></div><div><p class="text-xs" style="color:var(--muted)">LinkedIn</p><p class="font-medium group-hover:text-[var(--accent)] transition-colors">linkedin.com/in/neurondev</p></div></a>
+          </div>
+        </div>
+        <div class="reveal-r" style="transition-delay:.15s">
+          <div class="rounded-2xl p-8" style="background:var(--card);border:1px solid var(--border)">
+            <div class="space-y-5">
+              <div class="grid grid-cols-2 gap-5">
+                <div><label class="block text-sm font-medium mb-2">Name</label><input type="text" class="if" placeholder="Your name" id="c-name"></div>
+                <div><label class="block text-sm font-medium mb-2">Email</label><input type="email" class="if" placeholder="you@email.com" id="c-email"></div>
+              </div>
+              <div><label class="block text-sm font-medium mb-2">Subject</label><input type="text" class="if" placeholder="Project inquiry" id="c-subj"></div>
+              <div><label class="block text-sm font-medium mb-2">Message</label><textarea class="if" rows="5" placeholder="Tell me about your project..." id="c-msg"></textarea></div>
+              <button class="bp w-full justify-center" id="c-btn" onclick="submitContact()"><i class="fa-solid fa-paper-plane"></i> Send Message</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="relative z-10 py-10" style="border-top:1px solid var(--border)">
+    <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+      <p class="text-sm" style="color:var(--muted)">2025 NEURON DEV. Crafted with code and caffeine.</p>
+      <div class="flex items-center gap-6">
+        <a href="#" style="color:var(--muted)" class="hover:text-[var(--accent)] transition-colors"><i class="fa-brands fa-github text-lg"></i></a>
+        <a href="#" style="color:var(--muted)" class="hover:text-[var(--accent)] transition-colors"><i class="fa-brands fa-linkedin text-lg"></i></a>
+        <a href="#" style="color:var(--muted)" class="hover:text-[var(--accent)] transition-colors"><i class="fa-brands fa-x-twitter text-lg"></i></a>
+        <a href="#" style="color:var(--muted)" class="hover:text-[var(--accent)] transition-colors"><i class="fa-brands fa-dribbble text-lg"></i></a>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- ============ ADMIN PANEL ============ -->
+<div id="admin-panel">
+  <aside class="admin-side" id="admin-side">
+    <div class="px-5 mb-8 flex items-center gap-2">
+      <svg width="24" height="24" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="12" stroke="var(--accent)" stroke-width="2"/><circle cx="14" cy="14" r="4" fill="var(--accent)"/></svg>
+      <span class="fd font-bold text-sm" style="color:var(--fg)">ADMIN PANEL</span>
+    </div>
+    <div class="as-item on" data-v="a-dash" onclick="adminNav(this)"><i class="fa-solid fa-chart-line"></i> Dashboard</div>
+    <div class="as-item" data-v="a-list" onclick="adminNav(this)"><i class="fa-solid fa-folder-open"></i> Creations</div>
+    <div class="as-item" data-v="a-add" onclick="adminNav(this)"><i class="fa-solid fa-plus-circle"></i> Add Creation</div>
+    <div class="as-item" data-v="a-msgs" onclick="adminNav(this)"><i class="fa-solid fa-envelope"></i> Messages <span class="ml-auto text-xs px-2 py-0.5 rounded-full" style="background:var(--accent);color:var(--bg)" id="msg-badge">0</span></div>
+    <div style="flex:1"></div>
+    <div class="as-item" onclick="goPublic()"><i class="fa-solid fa-globe"></i> View Portfolio</div>
+    <div class="as-item" onclick="doLogout()" style="color:var(--danger)"><i class="fa-solid fa-right-from-bracket"></i> Logout</div>
+  </aside>
+  <main class="admin-main">
+    <!-- Dashboard -->
+    <div id="a-dash">
+      <h2 class="fd font-bold text-2xl mb-6">Dashboard</h2>
+      <div class="grid md:grid-cols-3 gap-5 mb-8">
+        <div class="a-card"><p class="text-xs uppercase tracking-wider mb-1" style="color:var(--muted)">Total Creations</p><p class="fd font-bold text-3xl" style="color:var(--accent)" id="d-total">0</p></div>
+        <div class="a-card"><p class="text-xs uppercase tracking-wider mb-1" style="color:var(--muted)">Messages</p><p class="fd font-bold text-3xl" style="color:var(--accent2)" id="d-msgs">0</p></div>
+        <div class="a-card"><p class="text-xs uppercase tracking-wider mb-1" style="color:var(--muted)">Categories</p><p class="fd font-bold text-3xl" style="color:var(--fg)" id="d-cats">0</p></div>
+      </div>
+      <div class="a-card"><h3 class="fd font-semibold text-lg mb-4">Recent Creations</h3><div id="d-recent"><p class="text-sm" style="color:var(--muted)">Loading...</p></div></div>
+    </div>
+    <!-- Creations List -->
+    <div id="a-list" class="hidden">
+      <div class="flex items-center justify-between mb-6 flex-wrap gap-4">
+        <h2 class="fd font-bold text-2xl">All Creations</h2>
+        <button class="bp text-sm py-2.5 px-5" onclick="adminNav(document.querySelector('[data-v=a-add]'))"><i class="fa-solid fa-plus"></i> Add New</button>
+      </div>
+      <div class="a-card overflow-x-auto" id="a-list-wrap">
+        <p class="text-sm" style="color:var(--muted)">Loading...</p>
+      </div>
+    </div>
+    <!-- Add Creation -->
+    <div id="a-add" class="hidden">
+      <h2 class="fd font-bold text-2xl mb-6" id="add-title">Add New Creation</h2>
+      <div class="a-card max-w-2xl">
+        <div class="space-y-5">
+          <div><label class="block text-sm font-medium mb-2">Project Image</label>
+            <div class="upload-zone p-8 text-center" id="adm-drop" onclick="document.getElementById('adm-file').click()" style="border:2px dashed var(--border);border-radius:14px;cursor:pointer;transition:all .3s">
+              <input type="file" id="adm-file" accept="image/*" hidden>
+              <div id="adm-drop-icon"><i class="fa-solid fa-cloud-arrow-up text-3xl mb-3" style="color:var(--accent)"></i><p class="font-medium">Click or drop image</p><p class="text-xs mt-1" style="color:var(--muted)">JPG, PNG, WebP up to 10MB</p></div>
+              <div id="adm-preview" class="flex justify-center"></div>
+            </div>
+            <div class="prog-bar hidden" id="adm-prog-wrap"><div class="prog-fill" id="adm-prog"></div></div>
+          </div>
+          <div class="grid md:grid-cols-2 gap-5">
+            <div><label class="block text-sm font-medium mb-2">Title</label><input type="text" class="if" placeholder="e.g. SaaS Dashboard" id="adm-ti"></div>
+            <div><label class="block text-sm font-medium mb-2">Category</label><select class="if" id="adm-cat"><option value="">Select</option><option value="websites">Websites</option><option value="webapps">Web Apps</option><option value="dashboards">Dashboards</option><option value="ecommerce">E-Commerce</option><option value="landing">Landing Pages</option></select></div>
+          </div>
+          <div><label class="block text-sm font-medium mb-2">Description</label><textarea class="if" rows="3" placeholder="Describe the project, challenges, and solutions..." id="adm-desc"></textarea></div>
+          <div class="grid md:grid-cols-2 gap-5">
+            <div><label class="block text-sm font-medium mb-2">Tech Stack</label><input type="text" class="if" placeholder="e.g. React, Node.js, PostgreSQL" id="adm-tools"></div>
+            <div><label class="block text-sm font-medium mb-2">Tags (comma separated)</label><input type="text" class="if" placeholder="e.g. react, dashboard, saas" id="adm-tags"></div>
+          </div>
+          <div class="flex gap-3 pt-2">
+            <button class="bp" id="adm-submit" onclick="adminSubmit()"><i class="fa-solid fa-rocket"></i> Publish</button>
+            <button class="bs hidden" id="adm-cancel" onclick="cancelEdit()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Messages -->
+    <div id="a-msgs" class="hidden">
+      <h2 class="fd font-bold text-2xl mb-6">Messages</h2>
+      <div id="a-msgs-list"><p class="text-sm" style="color:var(--muted)">Loading...</p></div>
+    </div>
+  </main>
+</div>
+
+<!-- LOGIN MODAL -->
+<div class="mb" id="login-modal">
+  <div class="mc">
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="fd font-bold text-xl">Admin Login</h3>
+      <button onclick="closeLogin()" style="color:var(--muted);background:none;border:none;cursor:pointer;font-size:20px" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="space-y-4">
+      <div><label class="block text-sm font-medium mb-2">Email</label><input type="email" class="if" placeholder="admin@email.com" id="l-email"></div>
+      <div><label class="block text-sm font-medium mb-2">Password</label><input type="password" class="if" placeholder="Enter password" id="l-pass"></div>
+      <p class="text-xs hidden" style="color:var(--danger)" id="l-err"></p>
+      <button class="bp w-full justify-center" id="l-btn" onclick="doLogin()"><i class="fa-solid fa-right-to-bracket"></i> Sign In</button>
+    </div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="mb" id="lb-modal">
+  <div class="mc" style="max-width:700px;padding:0;overflow:hidden">
+    <div class="relative"><img id="lb-img" src="" alt="" style="width:100%;display:block;border-radius:20px 20px 0 0;max-height:70vh;object-fit:cover"><button onclick="closeLb()" style="position:absolute;top:16px;right:16px;background:rgba(0,0,0,.6);border:none;color:white;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:16px" aria-label="Close"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="p-6"><h3 class="fd font-bold text-xl mb-1" id="lb-title"></h3><p class="text-sm mb-3" style="color:var(--accent)" id="lb-cat"></p><p class="text-sm" style="color:var(--muted)" id="lb-desc"></p><p class="text-xs mt-3" style="color:var(--muted)" id="lb-tools"></p></div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div class="mb" id="del-modal">
+  <div class="mc" style="max-width:400px;text-align:center">
+    <i class="fa-solid fa-triangle-exclamation text-4xl mb-4" style="color:var(--danger)"></i>
+    <h3 class="fd font-bold text-lg mb-2">Delete Creation?</h3>
+    <p class="text-sm mb-6" style="color:var(--muted)">This action cannot be undone. The image and data will be permanently removed.</p>
+    <div class="flex gap-3 justify-center">
+      <button class="bs" onclick="closeDel()">Cancel</button>
+      <button class="bd" id="del-confirm-btn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============ FIREBASE INIT ============ */
+const firebaseConfig = {
+  apiKey: "AIzaSyDDk_xiDvdcAv_B5oSogFH50azgLBVszKY",
+  authDomain: "e-learing-9adc3.firebaseapp.com",
+  databaseURL: "https://e-learing-9adc3-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "e-learing-9adc3",
+  storageBucket: "e-learing-9adc3.firebasestorage.app",
+  messagingSenderId: "349368530462",
+  appId: "1:349368530462:web:f4cbd2e51995ff7860200f",
+  measurementId: "G-RBESG4YNKM"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+const storage = firebase.storage();
+
+/* ============ STATE ============ */
+let creations = [];
+let messages = [];
+let currentFilter = 'all';
+let adminFile = null;
+let editingId = null;
+let editingImgUrl = '';
+let isInAdmin = false;
+
+/* ============ AUTH ============ */
+auth.onAuthStateChanged(user => {
+  const ba = document.getElementById('btn-admin');
+  const bl = document.getElementById('btn-login');
+  const blo = document.getElementById('btn-logout');
+  const bh = document.getElementById('btn-ham');
+  if (user) {
+    ba.classList.remove('hidden');
+    bl.classList.add('hidden');
+    blo.classList.remove('hidden');
+  } else {
+    ba.classList.add('hidden');
+    bl.classList.remove('hidden');
+    blo.classList.add('hidden');
+    if (isInAdmin) goPublic();
+  }
+  if (isInAdmin) bh.classList.remove('hidden'); else bh.classList.add('hidden');
+});
+
+function openLogin() { document.getElementById('login-modal').classList.add('op'); document.body.style.overflow='hidden'; document.getElementById('l-err').classList.add('hidden'); }
+function closeLogin() { document.getElementById('login-modal').classList.remove('op'); document.body.style.overflow=''; }
+
+function doLogin() {
+  const email = document.getElementById('l-email').value.trim();
+  const pass = document.getElementById('l-pass').value;
+  const errEl = document.getElementById('l-err');
+  const btn = document.getElementById('l-btn');
+  if (!email || !pass) { errEl.textContent='Please fill in all fields'; errEl.classList.remove('hidden'); return; }
+  btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Signing in...';
+  auth.signInWithEmailAndPassword(email, pass).then(() => {
+    closeLogin();
+    toast('Welcome back, Admin!','success');
+    document.getElementById('l-email').value=''; document.getElementById('l-pass').value='';
+  }).catch(e => {
+    errEl.textContent = e.code==='auth/invalid-credential'?'Invalid email or password':e.code==='auth/too-many-requests'?'Too many attempts. Try again later.':e.message;
+    errEl.classList.remove('hidden');
+  }).finally(() => { btn.disabled=false; btn.innerHTML='<i class="fa-solid fa-right-to-bracket"></i> Sign In'; });
+}
+
+function doLogout() { auth.signOut(); toast('Logged out successfully','success'); }
+
+/* ============ NAVIGATION ============ */
+function goAdmin() {
+  if (!auth.currentUser) { openLogin(); return; }
+  isInAdmin = true;
+  document.getElementById('pub-site').style.display='none';
+  document.getElementById('admin-panel').style.display='block';
+  document.getElementById('pub-nav').style.display='none';
+  document.getElementById('btn-ham').classList.remove('hidden');
+  document.getElementById('btn-admin').classList.add('hidden');
+  window.scrollTo(0,0);
+  loadAdminData();
+}
+
+function goPublic() {
+  isInAdmin = false;
+  document.getElementById('pub-site').style.display='block';
+  document.getElementById('admin-panel').style.display='none';
+  document.getElementById('pub-nav').style.display='';
+  document.getElementById('btn-ham').classList.add('hidden');
+  if (auth.currentUser) document.getElementById('btn-admin').classList.remove('hidden');
+  document.getElementById('admin-side').classList.remove('open');
+  window.scrollTo(0,0);
+  triggerReveals();
+}
+
+function toggleSide() { document.getElementById('admin-side').classList.toggle('open'); }
+
+function adminNav(el) {
+  document.querySelectorAll('.as-item').forEach(i=>i.classList.remove('on'));
+  el.classList.add('on');
+  ['a-dash','a-list','a-add','a-msgs'].forEach(v=>document.getElementById(v).classList.add('hidden'));
+  document.getElementById(el.dataset.v).classList.remove('hidden');
+  document.getElementById('admin-side').classList.remove('open');
+}
+
+/* ============ FIREBASE DATA LOADING ============ */
+function loadCreations(cb) {
+  db.ref('creations').orderByChild('createdAt').on('value', snap => {
+    const d = snap.val();
+    creations = d ? Object.entries(d).map(([k,v])=>({id:k,...v})).reverse() : [];
+    if (cb) cb();
+  });
+}
+
+function loadMessages(cb) {
+  if (!auth.currentUser) return;
+  db.ref('messages').orderByChild('createdAt').on('value', snap => {
+    const d = snap.val();
+    messages = d ? Object.entries(d).map(([k,v])=>({id:k,...v})).reverse() : [];
+    document.getElementById('msg-badge').textContent = messages.length;
+    if (cb) cb();
+  });
+}
+
+function loadAdminData() {
+  loadCreations(() => { renderAdminDashboard(); renderAdminList(); });
+  loadMessages(() => { renderAdminMessages(); });
+}
+
+/* ============ PUBLIC PORTFOLIO RENDER ============ */
+function renderPublicPortfolio() {
+  const grid = document.getElementById('p-grid');
+  const empty = document.getElementById('p-empty');
+  const loading = document.getElementById('p-load');
+  loading.classList.add('hidden');
+
+  const filtered = currentFilter==='all' ? creations : creations.filter(c=>c.category===currentFilter);
+  grid.innerHTML = '';
+
+  if (filtered.length === 0) {
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+
+  filtered.forEach((item, i) => {
+    const card = document.createElement('div');
+    card.className = 'pc reveal';
+    card.style.transitionDelay = `${i*0.07}s`;
+    card.innerHTML = `
+      <div style="aspect-ratio:3/2;overflow:hidden;background:var(--bg)">
+        <img src="${item.imageUrl||'https://picsum.photos/seed/def'+i+'/600/400.jpg'}" alt="${item.title}" style="width:100%;height:100%;object-fit:cover" loading="lazy" onerror="this.src='https://picsum.photos/seed/err${i}/600/400.jpg'">
+      </div>
+      <div class="co">
+        <div><p class="text-xs font-semibold uppercase tracking-wider mb-1" style="color:var(--accent)">${item.category||''}</p><h3 class="fd font-bold text-lg mb-1">${item.title}</h3><p class="text-xs" style="color:var(--muted)">${item.tools||''}</p></div>
+      </div>
+      <div class="p-5">
+        <p class="text-xs font-semibold uppercase tracking-wider mb-2" style="color:var(--accent)">${item.category||'Uncategorized'}</p>
+        <h3 class="fd font-semibold text-base mb-2">${item.title}</h3>
+        <p class="text-xs" style="color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${item.description||''}</p>
+        <div class="flex items-center justify-between mt-4">
+          <div class="flex gap-2 flex-wrap">${(item.tags||[]).slice(0,2).map(t=>`<span class="text-xs px-2 py-1 rounded-md" style="background:var(--accent-dim);color:var(--accent)">${t}</span>`).join('')}</div>
+          <button onclick="openLb('${(item.imageUrl||'').replace(/'/g,"\\'")}','${item.title.replace(/'/g,"\\'")}','${item.category||''}','${(item.description||'').replace(/'/g,"\\'")}','${(item.tools||'').replace(/'/g,"\\'")}')" style="color:var(--muted);background:none;border:none;cursor:pointer;transition:color .3s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'" aria-label="View"><i class="fa-solid fa-expand"></i></button>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+  requestAnimationFrame(()=>grid.querySelectorAll('.reveal').forEach(el=>rObs.observe(el)));
+
+  // Update stat
+  document.getElementById('stat-proj').dataset.t = creations.length;
+}
+
+// Filters
+document.getElementById('fbar').addEventListener('click', e => {
+  if (!e.target.classList.contains('fp')) return;
+  document.querySelectorAll('.fp').forEach(p=>p.classList.remove('on'));
+  e.target.classList.add('on');
+  currentFilter = e.target.dataset.f;
+  renderPublicPortfolio();
+});
+
+// Initial load
+loadCreations(() => { renderPublicPortfolio(); animateStats(); });
+
+/* ============ ADMIN: DASHBOARD ============ */
+function renderAdminDashboard() {
+  document.getElementById('d-total').textContent = creations.length;
+  document.getElementById('d-msgs').textContent = messages.length;
+  const cats = new Set(creations.map(c=>c.category).filter(Boolean));
+  document.getElementById('d-cats').textContent = cats.size;
+
+  const recent = document.getElementById('d-recent');
+  if (creations.length === 0) { recent.innerHTML='<p class="text-sm" style="color:var(--muted)">No creations yet. Add your first project!</p>'; return; }
+  recent.innerHTML = `<div class="space-y-3">${creations.slice(0,5).map(c=>`
+    <div class="flex items-center gap-4 p-3 rounded-xl" style="background:var(--bg)">
+      <img src="${c.imageUrl||'https://picsum.photos/seed/dash/80/80.jpg'}" style="width:48px;height:48px;border-radius:10px;object-fit:cover" onerror="this.src='https://picsum.photos/seed/dash/80/80.jpg'">
+      <div class="flex-1 min-w-0"><p class="font-medium text-sm truncate">${c.title}</p><p class="text-xs" style="color:var(--muted)">${c.category||''} &middot; ${c.tools||''}</p></div>
+    </div>`).join('')}</div>`;
+}
+
+/* ============ ADMIN: CREATIONS LIST ============ */
+function renderAdminList() {
+  const wrap = document.getElementById('a-list-wrap');
+  if (creations.length === 0) { wrap.innerHTML='<div class="empty-s"><i class="fa-solid fa-folder-open block"></i><p>No creations yet.</p></div>'; return; }
+  wrap.innerHTML = `<table class="a-table"><thead><tr><th>Image</th><th>Title</th><th>Category</th><th>Tools</th><th>Date</th><th>Actions</th></tr></thead><tbody>
+    ${creations.map(c=>`<tr>
+      <td><img src="${c.imageUrl||'https://picsum.photos/seed/tb/60/60.jpg'}" style="width:48px;height:36px;border-radius:8px;object-fit:cover" onerror="this.src='https://picsum.photos/seed/tb/60/60.jpg'"></td>
+      <td class="font-medium">${c.title}</td>
+      <td><span class="text-xs px-2 py-1 rounded-md" style="background:var(--accent-dim);color:var(--accent)">${c.category||'N/A'}</span></td>
+      <td class="text-sm" style="color:var(--muted)">${c.tools||'-'}</td>
+      <td class="text-sm" style="color:var(--muted)">${c.createdAt?new Date(c.createdAt).toLocaleDateString():'-'}</td>
+      <td><div class="flex gap-2">
+        <button onclick="editCreation('${c.id}')" class="text-sm" style="color:var(--accent);background:none;border:none;cursor:pointer" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
+        <button onclick="confirmDel('${c.id}')" class="text-sm" style="color:var(--danger);background:none;border:none;cursor:pointer" title="Delete"><i class="fa-solid fa-trash"></i></button>
+      </div></td>
+    </tr>`).join('')}
+  </tbody></table>`;
+}
+
+/* ============ ADMIN: MESSAGES ============ */
+function renderAdminMessages() {
+  const wrap = document.getElementById('a-msgs-list');
+  if (messages.length === 0) { wrap.innerHTML='<div class="empty-s"><i class="fa-solid fa-envelope-open block"></i><p>No messages yet.</p></div>'; return; }
+  wrap.innerHTML = `<div class="space-y-4">${messages.map(m=>`
+    <div class="a-card">
+      <div class="flex items-start justify-between mb-2">
+        <div><p class="font-medium">${m.name||'Anonymous'}</p><p class="text-xs" style="color:var(--muted)">${m.email||''} &middot; ${m.createdAt?new Date(m.createdAt).toLocaleString():''}</p></div>
+        <button onclick="deleteMsg('${m.id}')" style="color:var(--danger);background:none;border:none;cursor:pointer" title="Delete"><i class="fa-solid fa-trash text-sm"></i></button>
+      </div>
+      ${m.subject?`<p class="text-sm font-medium mb-1" style="color:var(--accent)">${m.subject}</p>`:''}
+      <p class="text-sm" style="color:var(--muted)">${m.message||''}</p>
+    </div>`).join('')}</div>`;
+}
+
+function deleteMsg(id) { db.ref('messages/'+id).remove().then(()=>toast('Message deleted','success')).catch(e=>toast(e.message,'error')); }
+
+/* ============ ADMIN: ADD/EDIT CREATION ============ */
+// File handling for admin
+const admDrop = document.getElementById('adm-drop');
+const admFile = document.getElementById('adm-file');
+['dragenter','dragover'].forEach(e=>admDrop.addEventListener(e,ev=>{ev.preventDefault();admDrop.style.borderColor='var(--accent)';admDrop.style.background='var(--accent-dim)'}));
+['dragleave','drop'].forEach(e=>admDrop.addEventListener(e,ev=>{ev.preventDefault();admDrop.style.borderColor='var(--border)';admDrop.style.background=''}));
+admDrop.addEventListener('drop', e => { if(e.dataTransfer.files[0]) setAdminFile(e.dataTransfer.files[0]); });
+admFile.addEventListener('change', () => { if(admFile.files[0]) setAdminFile(admFile.files[0]); admFile.value=''; });
+
+function setAdminFile(file) {
+  if (file.size > 10*1024*1024) { toast('Image must be under 10MB','error'); return; }
+  if (!file.type.startsWith('image/')) { toast('Please select an image file','error'); return; }
+  adminFile = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('adm-preview').innerHTML = `<img src="${e.target.result}" style="max-height:200px;border-radius:12px;border:1px solid var(--border)">`;
+    document.getElementById('adm-drop-icon').style.display='none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearAdminForm() {
+  adminFile = null; editingId = null; editingImgUrl = '';
+  document.getElementById('adm-ti').value='';
+  document.getElementById('adm-cat').value='';
+  document.getElementById('adm-desc').value='';
+  document.getElementById('adm-tools').value='';
+  document.getElementById('adm-tags').value='';
+  document.getElementById('adm-preview').innerHTML='';
+  document.getElementById('adm-drop-icon').style.display='';
+  document.getElementById('adm-prog-wrap').classList.add('hidden');
+  document.getElementById('adm-prog').style.width='0';
+  document.getElementById('add-title').textContent='Add New Creation';
+  document.getElementById('adm-submit').innerHTML='<i class="fa-solid fa-rocket"></i> Publish';
+  document.getElementById('adm-cancel').classList.add('hidden');
+}
+
+function adminSubmit() {
+  const title = document.getElementById('adm-ti').value.trim();
+  const category = document.getElementById('adm-cat').value;
+  const description = document.getElementById('adm-desc').value.trim();
+  const tools = document.getElementById('adm-tools').value.trim();
+  const tags = document.getElementById('adm-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
+
+  if (!title) { toast('Please enter a title','error'); return; }
+  if (!category) { toast('Please select a category','error'); return; }
+
+  const btn = document.getElementById('adm-submit');
+  btn.disabled = true;
+
+  const data = { title, category, description, tools, tags, updatedAt: firebase.database.ServerValue.TIMESTAMP };
+
+  if (adminFile) {
+    // Upload image first
+    const path = `creations/${Date.now()}_${adminFile.name}`;
+    const ref = storage.ref(path);
+    const task = ref.put(adminFile);
+    document.getElementById('adm-prog-wrap').classList.remove('hidden');
+    task.on('state_changed',
+      s => { const pct = (s.bytesTransferred/s.totalBytes)*100; document.getElementById('adm-prog').style.width=pct+'%'; },
+      e => { toast('Upload failed: '+e.message,'error'); btn.disabled=false; },
+      () => {
+        task.snapshot.ref.getDownloadURL().then(url => {
+          data.imageUrl = url;
+          data.storagePath = path;
+          saveCreation(data, btn);
         });
-        
-        // Mobile Menu Toggle
-        mobileMenuBtn.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-        });
-        
-        // Toast Notification
-        function showToast(message, type = 'success') {
-            toast.textContent = message;
-            toast.style.backgroundColor = type === 'success' ? '#3b82f6' : type === 'error' ? '#ef4444' : '#f59e0b';
-            toast.classList.add('show');
-            
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
-        
-        // Auth Modal
-        function openAuthModal() {
-            authModal.style.display = 'block';
-        }
-        
-        function closeAuthModal() {
-            authModal.style.display = 'none';
-        }
-        
-        loginBtn.addEventListener('click', openAuthModal);
-        mobileLoginBtn.addEventListener('click', openAuthModal);
-        
-        authModal.querySelector('.close-modal').addEventListener('click', closeAuthModal);
-        
-        window.addEventListener('click', (e) => {
-            if (e.target === authModal) closeAuthModal();
-            if (e.target === adminModal) closeAdminModal();
-        });
-        
-        // Auth Tabs
-        document.querySelectorAll('.auth-tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-                document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
-                
-                tab.classList.add('active');
-                document.getElementById(`${tab.dataset.tab}Form`).classList.add('active');
-            });
-        });
-        
-        // Login Form
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            
-            try {
-                await auth.signInWithEmailAndPassword(email, password);
-                closeAuthModal();
-                showToast('Login successful!');
-            } catch (error) {
-                showToast(error.message, 'error');
-            }
-        });
-        
-        // Signup Form
-        signupForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const name = document.getElementById('signupName').value;
-            const email = document.getElementById('signupEmail').value;
-            const password = document.getElementById('signupPassword').value;
-            
-            try {
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                
-                // Add user to Firestore
-                await db.collection('users').doc(userCredential.user.uid).set({
-                    name,
-                    email,
-                    role: 'viewer', // Default role is viewer
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                
-                closeAuthModal();
-                showToast('Account created successfully!');
-            } catch (error) {
-                showToast(error.message, 'error');
-            }
-        });
-        
-        // Logout
-        logoutBtn.addEventListener('click', () => {
-            auth.signOut();
-            showToast('Logged out successfully!');
-        });
-        
-        mobileLogoutBtn.addEventListener('click', () => {
-            auth.signOut();
-            mobileMenu.classList.add('hidden');
-            showToast('Logged out successfully!');
-        });
-        
-        // Auth State Observer
-        auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                currentUser = user;
-                
-                // Get user data from Firestore
-                const userDoc = await db.collection('users').doc(user.uid).get();
-                
-                if (userDoc.exists) {
-                    const userData = userDoc.data();
-                    isAdmin = userData.role === 'admin';
-                    
-                    // Update UI
-                    document.getElementById('authButtons').classList.add('hidden');
-                    document.getElementById('mobileAuthButtons').classList.add('hidden');
-                    document.getElementById('userMenu').classList.remove('hidden');
-                    document.getElementById('mobileUserMenu').classList.remove('hidden');
-                    
-                    // Update user info
-                    const initials = userData.name.split(' ').map(n => n[0]).join('').toUpperCase();
-                    document.getElementById('userInitials').textContent = initials;
-                    document.getElementById('userName').textContent = userData.name;
-                    
-                    // Show admin button if admin
-                    if (isAdmin) {
-                        document.getElementById('adminBtn').classList.remove('hidden');
-                        document.getElementById('mobileAdminBtn').classList.remove('hidden');
-                    } else {
-                        document.getElementById('adminBtn').classList.add('hidden');
-                        document.getElementById('mobileAdminBtn').classList.add('hidden');
-                    }
-                } else {
-                    // User document doesn't exist, sign out
-                    auth.signOut();
-                }
-            } else {
-                currentUser = null;
-                isAdmin = false;
-                
-                // Update UI
-                document.getElementById('authButtons').classList.remove('hidden');
-                document.getElementById('mobileAuthButtons').classList.remove('hidden');
-                document.getElementById('userMenu').classList.add('hidden');
-                document.getElementById('mobileUserMenu').classList.add('hidden');
-            }
-        });
-        
-        // Admin Panel
-        function openAdminModal() {
-            adminModal.style.display = 'block';
-            loadProjects();
-            loadMessages();
-            loadStats();
-            loadSettings();
-        }
-        
-        function closeAdminModal() {
-            adminModal.style.display = 'none';
-        }
-        
-        adminBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            openAdminModal();
-        });
-        
-        mobileAdminBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            mobileMenu.classList.add('hidden');
-            openAdminModal();
-        });
-        
-        adminModal.querySelector('.close-modal').addEventListener('click', closeAdminModal);
-        
-        // Admin Tabs
-        document.querySelectorAll('.admin-nav-item').forEach(tab => {
-            tab.addEventListener('click', () => {
-                document.querySelectorAll('.admin-nav-item').forEach(t => t.classList.remove('active'));
-                document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
-                
-                tab.classList.add('active');
-                document.getElementById(`${tab.dataset.tab}Tab`).classList.add('active');
-            });
-        });
-        
-        // Projects Management
-        async function loadProjects() {
-            try {
-                const snapshot = await db.collection('projects').orderBy('createdAt', 'desc').get();
-                
-                projectsList.innerHTML = '';
-                
-                if (snapshot.empty) {
-                    projectsList.innerHTML = '<p class="text-gray-400 text-center py-4">No projects yet. Add your first project!</p>';
-                    return;
-                }
-                
-                snapshot.forEach(doc => {
-                    const project = doc.data();
-                    const projectElement = document.createElement('div');
-                    projectElement.className = 'bg-gray-900/50 rounded-lg p-4 border border-white/5 flex items-center';
-                    
-                    projectElement.innerHTML = `
-                        <img src="${project.imageUrl || 'https://picsum.photos/seed/project' + doc.id + '/100/100'}" alt="${project.title}" class="w-16 h-16 rounded object-cover mr-4">
-                        <div class="flex-grow">
-                            <h4 class="font-bold">${project.title}</h4>
-                            <p class="text-gray-400 text-sm truncate">${project.description}</p>
-                        </div>
-                        <div class="flex space-x-2 ml-4">
-                            <button class="edit-project-btn text-blue-400 hover:text-blue-300" data-id="${doc.id}">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="delete-project-btn text-red-400 hover:text-red-300" data-id="${doc.id}">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    `;
-                    
-                    projectsList.appendChild(projectElement);
-                });
-                
-                // Add event listeners to edit and delete buttons
-                document.querySelectorAll('.edit-project-btn').forEach(btn => {
-                    btn.addEventListener('click', () => editProject(btn.dataset.id));
-                });
-                
-                document.querySelectorAll('.delete-project-btn').forEach(btn => {
-                    btn.addEventListener('click', () => deleteProject(btn.dataset.id));
-                });
-                
-            } catch (error) {
-                showToast('Error loading projects: ' + error.message, 'error');
-            }
-        }
-        
-        // Add Project Button
-        addProjectBtn.addEventListener('click', () => {
-            projectForm.classList.remove('hidden');
-            document.getElementById('projectFormTitle').textContent = 'Add New Project';
-            addProjectForm.reset();
-            document.getElementById('imagePreview').classList.add('hidden');
-            document.getElementById('projectId').value = '';
-            editingProjectId = null;
-        });
-        
-        // Cancel Project Button
-        cancelProjectBtn.addEventListener('click', () => {
-            projectForm.classList.add('hidden');
-        });
-        
-        // Project Image Preview
-        document.getElementById('projectImage').addEventListener('change', function() {
-            const preview = document.getElementById('imagePreview');
-            const previewImg = document.getElementById('previewImg');
-            
-            if (this.files && this.files[0]) {
-                const reader = new FileReader();
-                
-                reader.onload = function(e) {
-                    previewImg.src = e.target.result;
-                    preview.classList.remove('hidden');
-                };
-                
-                reader.readAsDataURL(this.files[0]);
-            } else {
-                preview.classList.add('hidden');
-            }
-        });
-        
-        // Add/Edit Project Form
-        addProjectForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const title = document.getElementById('projectTitle').value;
-            const description = document.getElementById('projectDescription').value;
-            const technologies = document.getElementById('projectTechnologies').value.split(',').map(tech => tech.trim());
-            const link = document.getElementById('projectLink').value;
-            const imageFile = document.getElementById('projectImage').files[0];
-            const projectId = document.getElementById('projectId').value;
-            
-            try {
-                let imageUrl = '';
-                
-                // Upload image if provided
-                if (imageFile) {
-                    const storageRef = storage.ref(`projects/${Date.now()}_${imageFile.name}`);
-                    const uploadTask = await storageRef.put(imageFile);
-                    imageUrl = await uploadTask.ref.getDownloadURL();
-                } else if (projectId) {
-                    // If editing and no new image, keep the old one
-                    const projectDoc = await db.collection('projects').doc(projectId).get();
-                    if (projectDoc.exists) {
-                        imageUrl = projectDoc.data().imageUrl;
-                    }
-                }
-                
-                if (projectId) {
-                    // Update existing project
-                    await db.collection('projects').doc(projectId).update({
-                        title,
-                        description,
-                        technologies,
-                        link,
-                        imageUrl,
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    
-                    showToast('Project updated successfully!');
-                } else {
-                    // Add new project
-                    await db.collection('projects').add({
-                        title,
-                        description,
-                        technologies,
-                        link,
-                        imageUrl,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    
-                    showToast('Project added successfully!');
-                }
-                
-                projectForm.classList.add('hidden');
-                loadProjects();
-                loadPublicProjects();
-                updateProjectCount();
-                
-            } catch (error) {
-                showToast('Error saving project: ' + error.message, 'error');
-            }
-        });
-        
-        // Edit Project
-        async function editProject(id) {
-            try {
-                const projectDoc = await db.collection('projects').doc(id).get();
-                
-                if (projectDoc.exists) {
-                    const project = projectDoc.data();
-                    
-                    projectForm.classList.remove('hidden');
-                    document.getElementById('projectFormTitle').textContent = 'Edit Project';
-                    document.getElementById('projectTitle').value = project.title;
-                    document.getElementById('projectDescription').value = project.description;
-                    document.getElementById('projectTechnologies').value = project.technologies.join(', ');
-                    document.getElementById('projectLink').value = project.link || '';
-                    document.getElementById('projectId').value = id;
-                    editingProjectId = id;
-                    
-                    if (project.imageUrl) {
-                        document.getElementById('previewImg').src = project.imageUrl;
-                        document.getElementById('imagePreview').classList.remove('hidden');
-                    } else {
-                        document.getElementById('imagePreview').classList.add('hidden');
-                    }
-                }
-            } catch (error) {
-                showToast('Error loading project: ' + error.message, 'error');
-            }
-        }
-        
-        // Delete Project
-        async function deleteProject(id) {
-            if (confirm('Are you sure you want to delete this project?')) {
-                try {
-                    await db.collection('projects').doc(id).delete();
-                    showToast('Project deleted successfully!');
-                    loadProjects();
-                    loadPublicProjects();
-                    updateProjectCount();
-                } catch (error) {
-                    showToast('Error deleting project: ' + error.message, 'error');
-                }
-            }
-        }
-        
-        // Load Public Projects
-        async function loadPublicProjects() {
-            try {
-                const snapshot = await db.collection('projects').orderBy('createdAt', 'desc').get();
-                
-                projectsGrid.innerHTML = '';
-                
-                if (snapshot.empty) {
-                    projectsGrid.innerHTML = '<p class="col-span-full text-gray-400 text-center py-10">No projects yet. Check back soon!</p>';
-                    return;
-                }
-                
-                snapshot.forEach(doc => {
-                    const project = doc.data();
-                    const projectCard = document.createElement('div');
-                    projectCard.className = 'project-card reveal';
-                    
-                    projectCard.innerHTML = `
-                        <img src="${project.imageUrl || 'https://picsum.photos/seed/project' + doc.id + '/600/400'}" alt="${project.title}" class="project-image">
-                        <div class="p-6">
-                            <h3 class="text-xl font-bold mb-2">${project.title}</h3>
-                            <p class="text-gray-400 mb-4 line-clamp-2">${project.description}</p>
-                            <div class="flex flex-wrap gap-2 mb-4">
-                                ${project.technologies.map(tech => `<span class="px-2 py-1 bg-gray-800 rounded text-xs text-gray-300">${tech}</span>`).join('')}
-                            </div>
-                            ${project.link ? `<a href="${project.link}" target="_blank" class="inline-flex items-center text-blue-400 hover:text-blue-300">
-                                <i class="fas fa-external-link-alt mr-2"></i>View Project
-                            </a>` : ''}
-                        </div>
-                    `;
-                    
-                    projectsGrid.appendChild(projectCard);
-                });
-                
-                // Re-init scroll reveal for new elements
-                initScrollReveal();
-                
-            } catch (error) {
-                projectsGrid.innerHTML = '<p class="col-span-full text-red-400 text-center py-10">Error loading projects. Please try again later.</p>';
-            }
-        }
-        
-        // Update Project Count
-        async function updateProjectCount() {
-            try {
-                const snapshot = await db.collection('projects').get();
-                const count = snapshot.size;
-                
-                document.getElementById('projectsCount').textContent = count;
-            } catch (error) {
-                console.error('Error updating project count:', error);
-            }
-        }
-        
-        // Messages Management
-        async function loadMessages() {
-            try {
-                const snapshot = await db.collection('messages').orderBy('createdAt', 'desc').get();
-                
-                messagesList.innerHTML = '';
-                
-                if (snapshot.empty) {
-                    messagesList.innerHTML = '<p class="text-gray-400 text-center py-4">No messages yet.</p>';
-                    return;
-                }
-                
-                snapshot.forEach(doc => {
-                    const message = doc.data();
-                    const messageElement = document.createElement('div');
-                    messageElement.className = 'message-card';
-                    
-                    const date = message.createdAt ? new Date(message.createdAt.seconds * 1000).toLocaleString() : 'Unknown date';
-                    
-                    messageElement.innerHTML = `
-                        <div class="flex justify-between items-start mb-2">
-                            <div>
-                                <h4 class="font-bold">${message.name}</h4>
-                                <p class="text-gray-400 text-sm">${message.email}</p>
-                            </div>
-                            <span class="text-gray-500 text-sm">${date}</span>
-                        </div>
-                        <h5 class="font-medium mb-2">${message.subject}</h5>
-                        <p class="text-gray-400">${message.message}</p>
-                        <div class="mt-4 flex justify-end">
-                            <button class="delete-message-btn text-red-400 hover:text-red-300 text-sm" data-id="${doc.id}">
-                                <i class="fas fa-trash mr-1"></i>Delete
-                            </button>
-                        </div>
-                    `;
-                    
-                    messagesList.appendChild(messageElement);
-                });
-                
-                // Add event listeners to delete buttons
-                document.querySelectorAll('.delete-message-btn').forEach(btn => {
-                    btn.addEventListener('click', () => deleteMessage(btn.dataset.id));
-                });
-                
-            } catch (error) {
-                showToast('Error loading messages: ' + error.message, 'error');
-            }
-        }
-        
-        // Delete Message
-        async function deleteMessage(id) {
-            if (confirm('Are you sure you want to delete this message?')) {
-                try {
-                    await db.collection('messages').doc(id).delete();
-                    showToast('Message deleted successfully!');
-                    loadMessages();
-                } catch (error) {
-                    showToast('Error deleting message: ' + error.message, 'error');
-                }
-            }
-        }
-        
-        // Stats Management
-        async function loadStats() {
-            try {
-                const doc = await db.collection('settings').doc('stats').get();
-                
-                if (doc.exists) {
-                    const stats = doc.data();
-                    document.getElementById('clientsInput').value = stats.clients || 0;
-                    document.getElementById('yearsInput').value = stats.years || 0;
-                } else {
-                    document.getElementById('clientsInput').value = 0;
-                    document.getElementById('yearsInput').value = 0;
-                }
-            } catch (error) {
-                console.error('Error loading stats:', error);
-            }
-        }
-        
-        // Save Stats
-        statsForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const clients = parseInt(document.getElementById('clientsInput').value) || 0;
-            const years = parseInt(document.getElementById('yearsInput').value) || 0;
-            
-            try {
-                await db.collection('settings').doc('stats').set({
-                    clients,
-                    years
-                }, { merge: true });
-                
-                showToast('Stats saved successfully!');
-                loadPublicStats();
-            } catch (error) {
-                showToast('Error saving stats: ' + error.message, 'error');
-            }
-        });
-        
-        // Load Public Stats
-        async function loadPublicStats() {
-            try {
-                const doc = await db.collection('settings').doc('stats').get();
-                
-                if (doc.exists) {
-                    const stats = doc.data();
-                    document.getElementById('clientsCount').textContent = stats.clients || 0;
-                    document.getElementById('yearsCount').textContent = stats.years || 0;
-                } else {
-                    document.getElementById('clientsCount').textContent = 0;
-                    document.getElementById('yearsCount').textContent = 0;
-                }
-                
-                // Update project count
-                await updateProjectCount();
-            } catch (error) {
-                console.error('Error loading public stats:', error);
-            }
-        }
-        
-        // Settings Management
-        async function loadSettings() {
-            try {
-                const doc = await db.collection('settings').doc('content').get();
-                
-                if (doc.exists) {
-                    const settings = doc.data();
-                    document.getElementById('heroTitle').value = settings.heroTitle || '';
-                    document.getElementById('heroSubtitle').value = settings.heroSubtitle || '';
-                    document.getElementById('aboutText').value = settings.aboutText || '';
-                }
-            } catch (error) {
-                console.error('Error loading settings:', error);
-            }
-        }
-        
-        // Save Settings
-        settingsForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const heroTitle = document.getElementById('heroTitle').value;
-            const heroSubtitle = document.getElementById('heroSubtitle').value;
-            const aboutText = document.getElementById('aboutText').value;
-            
-            try {
-                await db.collection('settings').doc('content').set({
-                    heroTitle,
-                    heroSubtitle,
-                    aboutText
-                }, { merge: true });
-                
-                showToast('Settings saved successfully!');
-                applySettings();
-            } catch (error) {
-                showToast('Error saving settings: ' + error.message, 'error');
-            }
-        });
-        
-        // Apply Settings to Public Pages
-        async function applySettings() {
-            try {
-                const doc = await db.collection('settings').doc('content').get();
-                
-                if (doc.exists) {
-                    const settings = doc.data();
-                    
-                    if (settings.heroTitle) {
-                        document.querySelector('#home h1').innerHTML = settings.heroTitle;
-                    }
-                    
-                    if (settings.heroSubtitle) {
-                        document.querySelector('#home p').textContent = settings.heroSubtitle;
-                    }
-                    
-                    if (settings.aboutText) {
-                        // This is a simple implementation, in a real app you might want more sophisticated HTML handling
-                        const aboutParagraphs = settings.aboutText.split('\n\n');
-                        const aboutTextContainer = document.querySelector('#about .reveal-left');
-                        const paragraphs = aboutTextContainer.querySelectorAll('p');
-                        
-                        aboutParagraphs.forEach((paragraph, index) => {
-                            if (paragraphs[index]) {
-                                paragraphs[index].textContent = paragraph;
-                            }
-                        });
-                    }
-                }
-            } catch (error) {
-                console.error('Error applying settings:', error);
-            }
-        }
-        
-        // Contact Form
-        contactForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const subject = document.getElementById('subject').value;
-            const message = document.getElementById('message').value;
-            
-            try {
-                await db.collection('messages').add({
-                    name,
-                    email,
-                    subject,
-                    message,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    read: false
-                });
-                
-                contactForm.reset();
-                showToast('Message sent successfully!');
-            } catch (error) {
-                showToast('Error sending message: ' + error.message, 'error');
-            }
-        });
-        
-        // Create Admin Account (Run once)
-        async function createAdminAccount() {
-            try {
-                // Check if admin account already exists
-                const adminDoc = await db.collection('users').where('email', '==', 'mnmjaasim@gmail.com').get();
-                
-                if (adminDoc.empty) {
-                    // Create admin account
-                    const userCredential = await auth.createUserWithEmailAndPassword('mnmjaasim@gmail.com', 'jaasim2010');
-                    
-                    // Set admin role
-                    await db.collection('users').doc(userCredential.user.uid).set({
-                        name: 'Admin',
-                        email: 'mnmjaasim@gmail.com',
-                        role: 'admin',
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    
-                    // Sign out after creating admin
-                    await auth.signOut();
-                    
-                    console.log('Admin account created successfully!');
-                }
-            } catch (error) {
-                console.error('Error creating admin account:', error);
-            }
-        }
-        
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            initNeuralNetwork();
-            initScrollReveal();
-            loadPublicProjects();
-            loadPublicStats();
-            applySettings();
-            createAdminAccount();
-        });
-    </script>
+      }
+    );
+  } else if (editingId && editingImgUrl) {
+    data.imageUrl = editingImgUrl;
+    saveCreation(data, btn);
+  } else {
+    // No image - use placeholder
+    data.imageUrl = `https://picsum.photos/seed/${Date.now()}/600/400.jpg`;
+    saveCreation(data, btn);
+  }
+}
+
+function saveCreation(data, btn) {
+  if (editingId) {
+    db.ref('creations/'+editingId).update(data).then(() => {
+      toast('Creation updated successfully!','success');
+      clearAdminForm();
+      btn.disabled = false;
+      adminNav(document.querySelector('[data-v=a-list]'));
+    }).catch(e => { toast(e.message,'error'); btn.disabled=false; });
+  } else {
+    data.createdAt = firebase.database.ServerValue.TIMESTAMP;
+    db.ref('creations').push(data).then(() => {
+      toast('Creation published successfully!','success');
+      clearAdminForm();
+      btn.disabled = false;
+      adminNav(document.querySelector('[data-v=a-list]'));
+    }).catch(e => { toast(e.message,'error'); btn.disabled=false; });
+  }
+}
+
+function editCreation(id) {
+  const c = creations.find(x=>x.id===id);
+  if (!c) return;
+  editingId = id;
+  editingImgUrl = c.imageUrl || '';
+  document.getElementById('adm-ti').value = c.title||'';
+  document.getElementById('adm-cat').value = c.category||'';
+  document.getElementById('adm-desc').value = c.description||'';
+  document.getElementById('adm-tools').value = c.tools||'';
+  document.getElementById('adm-tags').value = (c.tags||[]).join(', ');
+  if (editingImgUrl) {
+    document.getElementById('adm-preview').innerHTML = `<img src="${editingImgUrl}" style="max-height:200px;border-radius:12px;border:1px solid var(--border)" onerror="this.parentElement.innerHTML=''">`;
+    document.getElementById('adm-drop-icon').style.display='none';
+  }
+  document.getElementById('add-title').textContent='Edit Creation';
+  document.getElementById('adm-submit').innerHTML='<i class="fa-solid fa-check"></i> Update';
+  document.getElementById('adm-cancel').classList.remove('hidden');
+  adminNav(document.querySelector('[data-v=a-add]'));
+  window.scrollTo(0,0);
+}
+
+function cancelEdit() { clearAdminForm(); }
+
+/* ============ ADMIN: DELETE ============ */
+let delTarget = null;
+function confirmDel(id) { delTarget=id; document.getElementById('del-modal').classList.add('op'); document.body.style.overflow='hidden'; }
+function closeDel() { document.getElementById('del-modal').classList.remove('op'); document.body.style.overflow=''; delTarget=null; }
+
+document.getElementById('del-confirm-btn').addEventListener('click', () => {
+  if (!delTarget) return;
+  const c = creations.find(x=>x.id===delTarget);
+  const promises = [db.ref('creations/'+delTarget).remove()];
+  // Try to delete from storage
+  if (c && c.storagePath) {
+    promises.push(storage.ref(c.storagePath).delete().catch(()=>{}));
+  }
+  Promise.all(promises).then(()=>{ toast('Creation deleted','success'); closeDel(); if(editingId===delTarget) clearAdminForm(); }).catch(e=>toast(e.message,'error'));
+});
+
+/* ============ CONTACT FORM ============ */
+function submitContact() {
+  const name = document.getElementById('c-name').value.trim();
+  const email = document.getElementById('c-email').value.trim();
+  const subject = document.getElementById('c-subj').value.trim();
+  const message = document.getElementById('c-msg').value.trim();
+  if (!name||!email||!message) { toast('Please fill in name, email, and message','error'); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast('Please enter a valid email','error'); return; }
+
+  const btn = document.getElementById('c-btn');
+  btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
+  db.ref('messages').push({ name, email, subject, message, createdAt: firebase.database.ServerValue.TIMESTAMP }).then(() => {
+    toast('Message sent successfully! I\'ll get back to you soon.','success');
+    document.getElementById('c-name').value=''; document.getElementById('c-email').value=''; document.getElementById('c-subj').value=''; document.getElementById('c-msg').value='';
+  }).catch(e => toast('Failed to send: '+e.message,'error')).finally(()=>{ btn.disabled=false; btn.innerHTML='<i class="fa-solid fa-paper-plane"></i> Send Message'; });
+}
+
+/* ============ LIGHTBOX ============ */
+function openLb(img,title,cat,desc,tools) {
+  document.getElementById('lb-img').src=img||'https://picsum.photos/seed/lb/700/500.jpg';
+  document.getElementById('lb-title').textContent=title;
+  document.getElementById('lb-cat').textContent=cat;
+  document.getElementById('lb-desc').textContent=desc;
+  document.getElementById('lb-tools').textContent=tools?'Tech: '+tools:'';
+  document.getElementById('lb-modal').classList.add('op'); document.body.style.overflow='hidden';
+}
+function closeLb() { document.getElementById('lb-modal').classList.remove('op'); document.body.style.overflow=''; }
+
+// Close modals
+document.querySelectorAll('.mb').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m){m.classList.remove('op');document.body.style.overflow='';} }));
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelectorAll('.mb.op').forEach(m=>{m.classList.remove('op');document.body.style.overflow='';}); });
+
+/* ============ TOAST ============ */
+function toast(msg,type='success') {
+  const c=document.getElementById('toc'), t=document.createElement('div');
+  t.className='toast'+(type==='error'?' err':'');
+  const ic=type==='success'?'fa-check-circle':'fa-exclamation-circle';
+  const cl=type==='success'?'var(--accent)':'var(--danger)';
+  t.innerHTML=`<i class="fa-solid ${ic}" style="color:${cl};font-size:16px"></i> ${msg}`;
+  c.appendChild(t);
+  setTimeout(()=>{t.classList.add('out');t.addEventListener('animationend',()=>t.remove())},3500);
+}
+
+/* ============ TYPING EFFECT ============ */
+const tw=['Websites.','Web Apps.','Dashboards.','Experiences.','Platforms.','Solutions.'];
+let wi=0,ci=0,del=false;
+const twEl=document.getElementById('tw');
+function typeLoop(){
+  const w=tw[wi];
+  if(del){twEl.textContent=w.substring(0,ci--);if(ci<0){del=false;wi=(wi+1)%tw.length;setTimeout(typeLoop,400);return;}setTimeout(typeLoop,60);}
+  else{twEl.textContent=w.substring(0,ci++);if(ci>w.length){del=true;setTimeout(typeLoop,2000);return;}setTimeout(typeLoop,100);}
+}
+typeLoop();
+
+/* ============ SCROLL REVEAL ============ */
+const rObs = new IntersectionObserver((entries)=>{
+  entries.forEach(en=>{
+    if(en.isIntersecting){
+      en.target.classList.add('active');
+      if(en.target.closest('#skills-c')){
+        en.target.querySelectorAll('.sbf').forEach(b=>{b.style.width=b.dataset.w+'%'});
+      }
+    }
+  });
+},{threshold:.15,rootMargin:'0px 0px -50px 0px'});
+
+function triggerReveals(){ document.querySelectorAll('#pub-site .reveal,#pub-site .reveal-l,#pub-site .reveal-r,#pub-site .reveal-s').forEach(el=>rObs.observe(el)); }
+triggerReveals();
+
+/* ============ STAT COUNTERS ============ */
+const sObs = new IntersectionObserver((entries)=>{
+  entries.forEach(en=>{
+    if(en.isIntersecting){
+      const el=en.target, target=parseInt(el.dataset.t);
+      if(target===0&&el.id==='stat-proj'){el.textContent=creations.length+'+';sObs.unobserve(el);return;}
+      let cur=0;const step=Math.max(1,Math.floor(target/40));
+      const timer=setInterval(()=>{cur+=step;if(cur>=target){cur=target;clearInterval(timer);}el.textContent=cur+'+';},30);
+      sObs.unobserve(el);
+    }
+  });
+},{threshold:.5});
+function animateStats(){ document.querySelectorAll('.sn').forEach(el=>sObs.observe(el)); }
+animateStats();
+
+/* ============ SCROLL PROGRESS ============ */
+window.addEventListener('scroll',()=>{
+  const s=window.scrollY, h=document.documentElement.scrollHeight-window.innerHeight;
+  document.getElementById('sp').style.width=(h>0?(s/h)*100:0)+'%';
+  document.getElementById('nav').classList.toggle('sc',s>50);
+  // Parallax orbs
+  document.querySelectorAll('.orb').forEach((o,i)=>{o.style.transform=`translateY(${s*(0.03+i*0.02)}px)`;});
+});
+
+/* ============ NEURAL CANVAS ============ */
+const cv=document.getElementById('neural-canvas'), cx=cv.getContext('2d');
+let pts=[], mx=-1000, my=-1000, cW, cH;
+function rsz(){cW=cv.width=window.innerWidth;cH=cv.height=window.innerHeight;}
+rsz(); window.addEventListener('resize',rsz);
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+
+function initPts(){
+  pts=[];
+  const n=Math.min(70,Math.floor(cW*cH/20000));
+  for(let i=0;i<n;i++) pts.push({x:Math.random()*cW,y:Math.random()*cH,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4,r:Math.random()*2+1,o:Math.random()*.4+.15});
+}
+initPts();
+
+function drawNet(){
+  cx.clearRect(0,0,cW,cH);
+  for(let i=0;i<pts.length;i++){
+    const p=pts[i];
+    p.x+=p.vx; p.y+=p.vy;
+    if(p.x<0)p.x=cW; if(p.x>cW)p.x=0; if(p.y<0)p.y=cH; if(p.y>cH)p.y=0;
+    const dx=p.x-mx, dy=p.y-my, d=Math.sqrt(dx*dx+dy*dy);
+    if(d<150){const f=(150-d)/150*.6;p.x+=dx/d*f;p.y+=dy/d*f;}
+    cx.beginPath();cx.arc(p.x,p.y,Math.max(.5,p.r),0,Math.PI*2);cx.fillStyle=`rgba(0,229,160,${p.o})`;cx.fill();
+    for(let j=i+1;j<pts.length;j++){
+      const p2=pts[j],cdx=p.x-p2.x,cdy=p.y-p2.y,cd=Math.sqrt(cdx*cdx+cdy*cdy);
+      if(cd<150){cx.beginPath();cx.moveTo(p.x,p.y);cx.lineTo(p2.x,p2.y);cx.strokeStyle=`rgba(0,229,160,${(1-cd/150)*.12})`;cx.lineWidth=.7;cx.stroke();}
+    }
+    if(d<200){cx.beginPath();cx.moveTo(p.x,p.y);cx.lineTo(mx,my);cx.strokeStyle=`rgba(245,166,35,${(1-d/200)*.25})`;cx.lineWidth=.8;cx.stroke();}
+  }
+  requestAnimationFrame(drawNet);
+}
+drawNet();
+
+/* ============ HERO REVEAL ON LOAD ============ */
+window.addEventListener('load',()=>document.querySelectorAll('#hero .reveal').forEach(el=>el.classList.add('active')));
+</script>
 </body>
 </html>
