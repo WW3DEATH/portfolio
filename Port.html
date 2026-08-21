@@ -1,0 +1,1763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Portfolio</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Custom styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        
+        /* AI-themed background */
+        .ai-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #0a0a0a 70%);
+        }
+        
+        /* Neural network animation */
+        .neural-network {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.3;
+        }
+        
+        .neuron {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background-color: #3b82f6;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #3b82f6, 0 0 20px #3b82f6;
+        }
+        
+        .connection {
+            position: absolute;
+            height: 1px;
+            background-color: rgba(59, 130, 246, 0.3);
+            transform-origin: left center;
+        }
+        
+        /* Scroll animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+        
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .reveal-left {
+            opacity: 0;
+            transform: translateX(-50px);
+            transition: all 0.8s ease;
+        }
+        
+        .reveal-left.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .reveal-right {
+            opacity: 0;
+            transform: translateX(50px);
+            transition: all 0.8s ease;
+        }
+        
+        .reveal-right.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        /* Glowing button */
+        .glow-btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .glow-btn::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(transparent, rgba(59, 130, 246, 0.3), transparent 30%);
+            animation: rotate 4s linear infinite;
+        }
+        
+        .glow-btn::after {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            background: #171717;
+            border-radius: inherit;
+            z-index: 0;
+        }
+        
+        .glow-btn span {
+            position: relative;
+            z-index: 1;
+        }
+        
+        @keyframes rotate {
+            100% {
+                transform: rotate(1turn);
+            }
+        }
+        
+        /* Card hover effect */
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(59, 130, 246, 0.15);
+        }
+        
+        /* Particle effect */
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background-color: #3b82f6;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        
+        /* Loading animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #3b82f6;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background-color: #3b82f6;
+            color: white;
+            border-radius: 5px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 100;
+            overflow-y: auto;
+        }
+        
+        .modal-content {
+            background-color: #1a1a2e;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 800px;
+            position: relative;
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.1);
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close-modal:hover {
+            color: #3b82f6;
+        }
+        
+        /* Admin panel styles */
+        .admin-nav {
+            display: flex;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .admin-nav-item {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .admin-nav-item.active {
+            border-bottom-color: #3b82f6;
+            color: #3b82f6;
+        }
+        
+        .admin-nav-item:hover {
+            color: #3b82f6;
+        }
+        
+        .admin-tab {
+            display: none;
+        }
+        
+        .admin-tab.active {
+            display: block;
+        }
+        
+        /* Project card */
+        .project-card {
+            background-color: rgba(26, 26, 46, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .project-card:hover {
+            border-color: rgba(59, 130, 246, 0.3);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.1);
+        }
+        
+        .project-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        /* Message card */
+        .message-card {
+            background-color: rgba(26, 26, 46, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .message-card:hover {
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+        
+        /* Stat counter */
+        .stat-counter {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #3b82f6;
+            margin-bottom: 5px;
+        }
+        
+        /* Input styles */
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: rgba(26, 26, 46, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            color: white;
+            margin-bottom: 15px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        
+        .form-textarea {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: rgba(26, 26, 46, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            color: white;
+            margin-bottom: 15px;
+            resize: vertical;
+            min-height: 120px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        
+        /* Button styles */
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
+        
+        .btn-secondary {
+            background-color: transparent;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .btn-secondary:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+        
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+        
+        /* File input */
+        .file-input {
+            display: none;
+        }
+        
+        .file-label {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: rgba(26, 26, 46, 0.7);
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+        
+        .file-label:hover {
+            border-color: #3b82f6;
+        }
+        
+        /* Nav styles */
+        .nav-link {
+            color: #9ca3af;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            color: #ffffff;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: #3b82f6;
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after, .nav-link.active::after {
+            width: 100%;
+        }
+        
+        /* Auth styles */
+        .auth-container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: rgba(26, 26, 46, 0.7);
+            border-radius: 8px;
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.1);
+        }
+        
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .auth-tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            color: #9ca3af;
+            transition: color 0.3s ease;
+        }
+        
+        .auth-tab.active {
+            color: #3b82f6;
+            border-bottom: 2px solid #3b82f6;
+        }
+        
+        .auth-tab:hover {
+            color: #ffffff;
+        }
+        
+        .auth-form {
+            display: none;
+        }
+        
+        .auth-form.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- AI Background -->
+    <div class="ai-bg"></div>
+    <div class="neural-network" id="neuralNetwork"></div>
+    
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-black/70 border-b border-white/5">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0">
+                    <a href="#" class="text-xl font-bold text-white">
+                        <span class="text-blue-500">AI</span> Portfolio
+                    </a>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-center space-x-4">
+                        <a href="#home" class="nav-link active px-3 py-2 text-sm font-medium">Home</a>
+                        <a href="#about" class="nav-link px-3 py-2 text-sm font-medium">About</a>
+                        <a href="#creations" class="nav-link px-3 py-2 text-sm font-medium">Creations</a>
+                        <a href="#contact" class="nav-link px-3 py-2 text-sm font-medium">Contact</a>
+                        <div id="authButtons">
+                            <button id="loginBtn" class="btn-primary ml-4">Login</button>
+                        </div>
+                        <div id="userMenu" class="hidden">
+                            <div class="relative group">
+                                <button class="flex items-center space-x-2 text-sm">
+                                    <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
+                                        <span id="userInitials" class="text-white text-xs font-bold">U</span>
+                                    </div>
+                                    <span id="userName" class="text-gray-300">User</span>
+                                </button>
+                                <div class="absolute right-0 w-48 mt-2 bg-gray-900 rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
+                                    <a href="#" id="profileBtn" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800">Profile</a>
+                                    <a href="#" id="adminBtn" class="hidden block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800">Admin Panel</a>
+                                    <a href="#" id="logoutBtn" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800">Logout</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobileMenuBtn" class="text-gray-400 hover:text-white focus:outline-none">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile menu -->
+        <div id="mobileMenu" class="hidden md:hidden bg-black/90 border-t border-white/5">
+            <div class="px-4 py-3 space-y-3">
+                <a href="#home" class="block text-gray-300 hover:text-white py-2">Home</a>
+                <a href="#about" class="block text-gray-300 hover:text-white py-2">About</a>
+                <a href="#creations" class="block text-gray-300 hover:text-white py-2">Creations</a>
+                <a href="#contact" class="block text-gray-300 hover:text-white py-2">Contact</a>
+                <div id="mobileAuthButtons">
+                    <button id="mobileLoginBtn" class="btn-primary w-full mt-2">Login</button>
+                </div>
+                <div id="mobileUserMenu" class="hidden">
+                    <div class="flex items-center space-x-3 py-2">
+                        <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
+                            <span class="text-white text-xs font-bold">U</span>
+                        </div>
+                        <span class="text-gray-300">User</span>
+                    </div>
+                    <a href="#" id="mobileProfileBtn" class="block text-gray-300 hover:text-white py-2">Profile</a>
+                    <a href="#" id="mobileAdminBtn" class="hidden block text-gray-300 hover:text-white py-2">Admin Panel</a>
+                    <a href="#" id="mobileLogoutBtn" class="block text-gray-300 hover:text-white py-2">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Hero Section -->
+    <section id="home" class="min-h-screen flex items-center justify-center pt-16">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="reveal">
+                <div class="inline-block mb-6 px-4 py-2 rounded-full border border-blue-500/30 bg-blue-500/10">
+                    <span class="text-blue-400 text-sm font-medium">AI-Powered Portfolio</span>
+                </div>
+            </div>
+            <h1 class="reveal text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight">
+                Crafting Digital Experiences with <span class="text-blue-500">AI</span>
+            </h1>
+            <p class="reveal text-lg text-gray-400 mb-10 max-w-2xl mx-auto">
+                Explore my portfolio of innovative web development projects enhanced with artificial intelligence. Each creation is designed to push the boundaries of what's possible.
+            </p>
+            <div class="reveal flex flex-col sm:flex-row justify-center gap-4">
+                <a href="#creations" class="glow-btn rounded-lg px-8 py-4 text-white font-medium">
+                    <span>View Creations</span>
+                </a>
+                <a href="#contact" class="btn-secondary rounded-lg px-8 py-4">
+                    Get In Touch
+                </a>
+            </div>
+            <div class="reveal mt-16">
+                <div class="animate-bounce text-gray-500">
+                    <i class="fas fa-chevron-down text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- About Section -->
+    <section id="about" class="py-20">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="reveal text-3xl md:text-4xl font-bold mb-4">About Me</h2>
+                <div class="reveal w-20 h-1 bg-blue-500 mx-auto"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div class="reveal-left">
+                    <h3 class="text-2xl font-bold mb-6">Web Developer & AI Enthusiast</h3>
+                    <p class="text-gray-400 mb-6">
+                        I'm a passionate web developer with a keen interest in artificial intelligence and its applications in creating interactive, user-centric digital experiences. My focus is on building responsive, performant websites that leverage AI to provide unique functionalities.
+                    </p>
+                    <p class="text-gray-400 mb-8">
+                        With expertise in modern web technologies and AI integration, I create solutions that are not only visually appealing but also intelligent and adaptive to user needs.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-blue-500 hover:text-white transition-all">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-blue-500 hover:text-white transition-all">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-blue-500 hover:text-white transition-all">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="reveal-right">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="bg-gray-900/50 rounded-lg p-6 border border-white/5">
+                            <div class="stat-counter" id="projectsCount">0</div>
+                            <div class="text-gray-400">Projects</div>
+                        </div>
+                        <div class="bg-gray-900/50 rounded-lg p-6 border border-white/5">
+                            <div class="stat-counter" id="clientsCount">0</div>
+                            <div class="text-gray-400">Clients</div>
+                        </div>
+                        <div class="bg-gray-900/50 rounded-lg p-6 border border-white/5">
+                            <div class="stat-counter" id="yearsCount">0</div>
+                            <div class="text-gray-400">Years Experience</div>
+                        </div>
+                        <div class="bg-gray-900/50 rounded-lg p-6 border border-white/5">
+                            <div class="stat-counter" id="technologiesCount">12</div>
+                            <div class="text-gray-400">Technologies</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Creations Section -->
+    <section id="creations" class="py-20 bg-black/30">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="reveal text-3xl md:text-4xl font-bold mb-4">My Creations</h2>
+                <div class="reveal w-20 h-1 bg-blue-500 mx-auto mb-6"></div>
+                <p class="reveal text-gray-400 max-w-2xl mx-auto">
+                    Explore my portfolio of innovative web development projects enhanced with artificial intelligence.
+                </p>
+            </div>
+            
+            <div id="projectsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Projects will be loaded here -->
+                <div class="col-span-full text-center py-10">
+                    <div class="loading mx-auto mb-4"></div>
+                    <p class="text-gray-400">Loading projects...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Contact Section -->
+    <section id="contact" class="py-20">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="reveal text-3xl md:text-4xl font-bold mb-4">Get In Touch</h2>
+                <div class="reveal w-20 h-1 bg-blue-500 mx-auto mb-6"></div>
+                <p class="reveal text-gray-400 max-w-2xl mx-auto">
+                    Have a project in mind or want to collaborate? Feel free to reach out.
+                </p>
+            </div>
+            
+            <div class="reveal">
+                <form id="contactForm" class="bg-gray-900/50 rounded-lg p-8 border border-white/5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-400 mb-2">Name</label>
+                            <input type="text" id="name" name="name" class="form-input" required>
+                        </div>
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-400 mb-2">Email</label>
+                            <input type="email" id="email" name="email" class="form-input" required>
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <label for="subject" class="block text-sm font-medium text-gray-400 mb-2">Subject</label>
+                        <input type="text" id="subject" name="subject" class="form-input" required>
+                    </div>
+                    <div class="mb-6">
+                        <label for="message" class="block text-sm font-medium text-gray-400 mb-2">Message</label>
+                        <textarea id="message" name="message" class="form-textarea" required></textarea>
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn-primary px-8 py-3">
+                            Send Message
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="py-8 border-t border-white/5">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <a href="#" class="text-xl font-bold text-white">
+                        <span class="text-blue-500">AI</span> Portfolio
+                    </a>
+                </div>
+                <div class="flex space-x-6 mb-4 md:mb-0">
+                    <a href="#home" class="text-gray-400 hover:text-white transition-colors">Home</a>
+                    <a href="#about" class="text-gray-400 hover:text-white transition-colors">About</a>
+                    <a href="#creations" class="text-gray-400 hover:text-white transition-colors">Creations</a>
+                    <a href="#contact" class="text-gray-400 hover:text-white transition-colors">Contact</a>
+                </div>
+                <div class="text-gray-500 text-sm">
+                    &copy; 2023 AI Portfolio. All rights reserved.
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Auth Modal -->
+    <div id="authModal" class="modal">
+        <div class="modal-content max-w-md">
+            <span class="close-modal">&times;</span>
+            <h2 class="text-2xl font-bold mb-6 text-center">Welcome</h2>
+            
+            <div class="auth-tabs">
+                <div class="auth-tab active" data-tab="login">Login</div>
+                <div class="auth-tab" data-tab="signup">Sign Up</div>
+            </div>
+            
+            <form id="loginForm" class="auth-form active">
+                <div class="mb-4">
+                    <label for="loginEmail" class="block text-sm font-medium text-gray-400 mb-2">Email</label>
+                    <input type="email" id="loginEmail" class="form-input" required>
+                </div>
+                <div class="mb-6">
+                    <label for="loginPassword" class="block text-sm font-medium text-gray-400 mb-2">Password</label>
+                    <input type="password" id="loginPassword" class="form-input" required>
+                </div>
+                <button type="submit" class="btn-primary w-full py-3">Login</button>
+            </form>
+            
+            <form id="signupForm" class="auth-form">
+                <div class="mb-4">
+                    <label for="signupName" class="block text-sm font-medium text-gray-400 mb-2">Name</label>
+                    <input type="text" id="signupName" class="form-input" required>
+                </div>
+                <div class="mb-4">
+                    <label for="signupEmail" class="block text-sm font-medium text-gray-400 mb-2">Email</label>
+                    <input type="email" id="signupEmail" class="form-input" required>
+                </div>
+                <div class="mb-6">
+                    <label for="signupPassword" class="block text-sm font-medium text-gray-400 mb-2">Password</label>
+                    <input type="password" id="signupPassword" class="form-input" required>
+                </div>
+                <button type="submit" class="btn-primary w-full py-3">Sign Up</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Admin Panel Modal -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content max-w-4xl">
+            <span class="close-modal">&times;</span>
+            <h2 class="text-2xl font-bold mb-6">Admin Panel</h2>
+            
+            <div class="admin-nav">
+                <div class="admin-nav-item active" data-tab="projects">Projects</div>
+                <div class="admin-nav-item" data-tab="messages">Messages</div>
+                <div class="admin-nav-item" data-tab="stats">Stats</div>
+                <div class="admin-nav-item" data-tab="settings">Settings</div>
+            </div>
+            
+            <!-- Projects Tab -->
+            <div id="projectsTab" class="admin-tab active">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold">Projects</h3>
+                    <button id="addProjectBtn" class="btn-primary">
+                        <i class="fas fa-plus mr-2"></i>Add Project
+                    </button>
+                </div>
+                
+                <div id="projectsList" class="space-y-4">
+                    <!-- Projects will be loaded here -->
+                </div>
+                
+                <!-- Add/Edit Project Form -->
+                <div id="projectForm" class="hidden mt-8 bg-gray-900/50 rounded-lg p-6 border border-white/5">
+                    <h3 id="projectFormTitle" class="text-xl font-bold mb-6">Add New Project</h3>
+                    <form id="addProjectForm">
+                        <div class="mb-4">
+                            <label for="projectTitle" class="block text-sm font-medium text-gray-400 mb-2">Title</label>
+                            <input type="text" id="projectTitle" class="form-input" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="projectDescription" class="block text-sm font-medium text-gray-400 mb-2">Description</label>
+                            <textarea id="projectDescription" class="form-textarea" required></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label for="projectTechnologies" class="block text-sm font-medium text-gray-400 mb-2">Technologies (comma separated)</label>
+                            <input type="text" id="projectTechnologies" class="form-input" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="projectLink" class="block text-sm font-medium text-gray-400 mb-2">Project Link</label>
+                            <input type="url" id="projectLink" class="form-input">
+                        </div>
+                        <div class="mb-4">
+                            <label for="projectImage" class="block text-sm font-medium text-gray-400 mb-2">Project Image</label>
+                            <input type="file" id="projectImage" class="file-input" accept="image/*">
+                            <label for="projectImage" class="file-label">
+                                <i class="fas fa-cloud-upload-alt mr-2"></i>Choose Image
+                            </label>
+                            <div id="imagePreview" class="mt-2 hidden">
+                                <img id="previewImg" src="" alt="Preview" class="max-h-40 rounded">
+                            </div>
+                        </div>
+                        <div class="flex space-x-4">
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-save mr-2"></i>Save Project
+                            </button>
+                            <button type="button" id="cancelProjectBtn" class="btn-secondary">Cancel</button>
+                        </div>
+                        <input type="hidden" id="projectId" value="">
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Messages Tab -->
+            <div id="messagesTab" class="admin-tab">
+                <h3 class="text-xl font-bold mb-6">Messages</h3>
+                <div id="messagesList">
+                    <!-- Messages will be loaded here -->
+                </div>
+            </div>
+            
+            <!-- Stats Tab -->
+            <div id="statsTab" class="admin-tab">
+                <h3 class="text-xl font-bold mb-6">Website Stats</h3>
+                <form id="statsForm" class="bg-gray-900/50 rounded-lg p-6 border border-white/5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="clientsInput" class="block text-sm font-medium text-gray-400 mb-2">Number of Clients</label>
+                            <input type="number" id="clientsInput" class="form-input" min="0">
+                        </div>
+                        <div>
+                            <label for="yearsInput" class="block text-sm font-medium text-gray-400 mb-2">Years of Experience</label>
+                            <input type="number" id="yearsInput" class="form-input" min="0">
+                        </div>
+                    </div>
+                    <div class="mt-6">
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-save mr-2"></i>Save Stats
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Settings Tab -->
+            <div id="settingsTab" class="admin-tab">
+                <h3 class="text-xl font-bold mb-6">Website Settings</h3>
+                <form id="settingsForm" class="bg-gray-900/50 rounded-lg p-6 border border-white/5">
+                    <div class="mb-4">
+                        <label for="heroTitle" class="block text-sm font-medium text-gray-400 mb-2">Hero Title</label>
+                        <input type="text" id="heroTitle" class="form-input">
+                    </div>
+                    <div class="mb-4">
+                        <label for="heroSubtitle" class="block text-sm font-medium text-gray-400 mb-2">Hero Subtitle</label>
+                        <textarea id="heroSubtitle" class="form-textarea"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="aboutText" class="block text-sm font-medium text-gray-400 mb-2">About Text</label>
+                        <textarea id="aboutText" class="form-textarea" rows="6"></textarea>
+                    </div>
+                    <div class="mt-6">
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-save mr-2"></i>Save Settings
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+    
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCQfez99YicEihjHJc1SSatxHtRQSeKAUY",
+            authDomain: "marketspot-e44b4.firebaseapp.com",
+            databaseURL: "https://marketspot-e44b4-default-rtdb.firebaseio.com",
+            projectId: "marketspot-e44b4",
+            storageBucket: "marketspot-e44b4.firebasestorage.app",
+            messagingSenderId: "775423662696",
+            appId: "1:775423662696:web:a6050d49843b0563bdf9dd",
+            measurementId: "G-H0P21TSB1X"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+        
+        // DOM Elements
+        const loginBtn = document.getElementById('loginBtn');
+        const mobileLoginBtn = document.getElementById('mobileLoginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
+        const authModal = document.getElementById('authModal');
+        const adminModal = document.getElementById('adminModal');
+        const adminBtn = document.getElementById('adminBtn');
+        const mobileAdminBtn = document.getElementById('mobileAdminBtn');
+        const loginForm = document.getElementById('loginForm');
+        const signupForm = document.getElementById('signupForm');
+        const contactForm = document.getElementById('contactForm');
+        const projectsGrid = document.getElementById('projectsGrid');
+        const projectsList = document.getElementById('projectsList');
+        const messagesList = document.getElementById('messagesList');
+        const addProjectBtn = document.getElementById('addProjectBtn');
+        const projectForm = document.getElementById('projectForm');
+        const addProjectForm = document.getElementById('addProjectForm');
+        const cancelProjectBtn = document.getElementById('cancelProjectBtn');
+        const statsForm = document.getElementById('statsForm');
+        const settingsForm = document.getElementById('settingsForm');
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const toast = document.getElementById('toast');
+        
+        // Variables
+        let currentUser = null;
+        let isAdmin = false;
+        let editingProjectId = null;
+        
+        // Initialize Neural Network Animation
+        function initNeuralNetwork() {
+            const container = document.getElementById('neuralNetwork');
+            const neurons = [];
+            const numNeurons = 30;
+            
+            // Create neurons
+            for (let i = 0; i < numNeurons; i++) {
+                const neuron = document.createElement('div');
+                neuron.className = 'neuron';
+                neuron.style.left = `${Math.random() * 100}%`;
+                neuron.style.top = `${Math.random() * 100}%`;
+                container.appendChild(neuron);
+                neurons.push({
+                    element: neuron,
+                    x: parseFloat(neuron.style.left),
+                    y: parseFloat(neuron.style.top),
+                    vx: (Math.random() - 0.5) * 0.02,
+                    vy: (Math.random() - 0.5) * 0.02
+                });
+            }
+            
+            // Create connections
+            const connections = [];
+            for (let i = 0; i < numNeurons; i++) {
+                for (let j = i + 1; j < numNeurons; j++) {
+                    const connection = document.createElement('div');
+                    connection.className = 'connection';
+                    container.appendChild(connection);
+                    connections.push({
+                        element: connection,
+                        from: i,
+                        to: j
+                    });
+                }
+            }
+            
+            // Animation loop
+            function animate() {
+                // Update neuron positions
+                neurons.forEach(neuron => {
+                    neuron.x += neuron.vx;
+                    neuron.y += neuron.vy;
+                    
+                    // Bounce off edges
+                    if (neuron.x < 0 || neuron.x > 100) neuron.vx *= -1;
+                    if (neuron.y < 0 || neuron.y > 100) neuron.vy *= -1;
+                    
+                    neuron.element.style.left = `${neuron.x}%`;
+                    neuron.element.style.top = `${neuron.y}%`;
+                });
+                
+                // Update connections
+                connections.forEach(connection => {
+                    const fromNeuron = neurons[connection.from];
+                    const toNeuron = neurons[connection.to];
+                    
+                    const dx = (toNeuron.x - fromNeuron.x) * window.innerWidth / 100;
+                    const dy = (toNeuron.y - fromNeuron.y) * window.innerHeight / 100;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 200) {
+                        const angle = Math.atan2(dy, dx);
+                        connection.element.style.width = `${distance}px`;
+                        connection.element.style.left = `${fromNeuron.x * window.innerWidth / 100}px`;
+                        connection.element.style.top = `${fromNeuron.y * window.innerHeight / 100}px`;
+                        connection.element.style.transform = `rotate(${angle}rad)`;
+                        connection.element.style.opacity = 1 - distance / 200;
+                    } else {
+                        connection.element.style.opacity = 0;
+                    }
+                });
+                
+                requestAnimationFrame(animate);
+            }
+            
+            animate();
+        }
+        
+        // Scroll Reveal Animation
+        function initScrollReveal() {
+            const reveals = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
+            
+            window.addEventListener('scroll', () => {
+                const scrollPosition = window.scrollY;
+                
+                reveals.forEach(reveal => {
+                    const elementTop = reveal.offsetTop;
+                    const elementHeight = reveal.offsetHeight;
+                    
+                    if (scrollPosition > elementTop - window.innerHeight + elementHeight / 3) {
+                        reveal.classList.add('active');
+                    }
+                });
+            });
+            
+            // Trigger initial check
+            window.dispatchEvent(new Event('scroll'));
+        }
+        
+        // Smooth Scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 70,
+                        behavior: 'smooth'
+                    });
+                    
+                    // Close mobile menu if open
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+        });
+        
+        // Mobile Menu Toggle
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // Toast Notification
+        function showToast(message, type = 'success') {
+            toast.textContent = message;
+            toast.style.backgroundColor = type === 'success' ? '#3b82f6' : type === 'error' ? '#ef4444' : '#f59e0b';
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Auth Modal
+        function openAuthModal() {
+            authModal.style.display = 'block';
+        }
+        
+        function closeAuthModal() {
+            authModal.style.display = 'none';
+        }
+        
+        loginBtn.addEventListener('click', openAuthModal);
+        mobileLoginBtn.addEventListener('click', openAuthModal);
+        
+        authModal.querySelector('.close-modal').addEventListener('click', closeAuthModal);
+        
+        window.addEventListener('click', (e) => {
+            if (e.target === authModal) closeAuthModal();
+            if (e.target === adminModal) closeAdminModal();
+        });
+        
+        // Auth Tabs
+        document.querySelectorAll('.auth-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(`${tab.dataset.tab}Form`).classList.add('active');
+            });
+        });
+        
+        // Login Form
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                closeAuthModal();
+                showToast('Login successful!');
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        });
+        
+        // Signup Form
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                
+                // Add user to Firestore
+                await db.collection('users').doc(userCredential.user.uid).set({
+                    name,
+                    email,
+                    role: 'viewer', // Default role is viewer
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                closeAuthModal();
+                showToast('Account created successfully!');
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        });
+        
+        // Logout
+        logoutBtn.addEventListener('click', () => {
+            auth.signOut();
+            showToast('Logged out successfully!');
+        });
+        
+        mobileLogoutBtn.addEventListener('click', () => {
+            auth.signOut();
+            mobileMenu.classList.add('hidden');
+            showToast('Logged out successfully!');
+        });
+        
+        // Auth State Observer
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                currentUser = user;
+                
+                // Get user data from Firestore
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    isAdmin = userData.role === 'admin';
+                    
+                    // Update UI
+                    document.getElementById('authButtons').classList.add('hidden');
+                    document.getElementById('mobileAuthButtons').classList.add('hidden');
+                    document.getElementById('userMenu').classList.remove('hidden');
+                    document.getElementById('mobileUserMenu').classList.remove('hidden');
+                    
+                    // Update user info
+                    const initials = userData.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                    document.getElementById('userInitials').textContent = initials;
+                    document.getElementById('userName').textContent = userData.name;
+                    
+                    // Show admin button if admin
+                    if (isAdmin) {
+                        document.getElementById('adminBtn').classList.remove('hidden');
+                        document.getElementById('mobileAdminBtn').classList.remove('hidden');
+                    } else {
+                        document.getElementById('adminBtn').classList.add('hidden');
+                        document.getElementById('mobileAdminBtn').classList.add('hidden');
+                    }
+                } else {
+                    // User document doesn't exist, sign out
+                    auth.signOut();
+                }
+            } else {
+                currentUser = null;
+                isAdmin = false;
+                
+                // Update UI
+                document.getElementById('authButtons').classList.remove('hidden');
+                document.getElementById('mobileAuthButtons').classList.remove('hidden');
+                document.getElementById('userMenu').classList.add('hidden');
+                document.getElementById('mobileUserMenu').classList.add('hidden');
+            }
+        });
+        
+        // Admin Panel
+        function openAdminModal() {
+            adminModal.style.display = 'block';
+            loadProjects();
+            loadMessages();
+            loadStats();
+            loadSettings();
+        }
+        
+        function closeAdminModal() {
+            adminModal.style.display = 'none';
+        }
+        
+        adminBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            openAdminModal();
+        });
+        
+        mobileAdminBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            mobileMenu.classList.add('hidden');
+            openAdminModal();
+        });
+        
+        adminModal.querySelector('.close-modal').addEventListener('click', closeAdminModal);
+        
+        // Admin Tabs
+        document.querySelectorAll('.admin-nav-item').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.admin-nav-item').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(`${tab.dataset.tab}Tab`).classList.add('active');
+            });
+        });
+        
+        // Projects Management
+        async function loadProjects() {
+            try {
+                const snapshot = await db.collection('projects').orderBy('createdAt', 'desc').get();
+                
+                projectsList.innerHTML = '';
+                
+                if (snapshot.empty) {
+                    projectsList.innerHTML = '<p class="text-gray-400 text-center py-4">No projects yet. Add your first project!</p>';
+                    return;
+                }
+                
+                snapshot.forEach(doc => {
+                    const project = doc.data();
+                    const projectElement = document.createElement('div');
+                    projectElement.className = 'bg-gray-900/50 rounded-lg p-4 border border-white/5 flex items-center';
+                    
+                    projectElement.innerHTML = `
+                        <img src="${project.imageUrl || 'https://picsum.photos/seed/project' + doc.id + '/100/100'}" alt="${project.title}" class="w-16 h-16 rounded object-cover mr-4">
+                        <div class="flex-grow">
+                            <h4 class="font-bold">${project.title}</h4>
+                            <p class="text-gray-400 text-sm truncate">${project.description}</p>
+                        </div>
+                        <div class="flex space-x-2 ml-4">
+                            <button class="edit-project-btn text-blue-400 hover:text-blue-300" data-id="${doc.id}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="delete-project-btn text-red-400 hover:text-red-300" data-id="${doc.id}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    
+                    projectsList.appendChild(projectElement);
+                });
+                
+                // Add event listeners to edit and delete buttons
+                document.querySelectorAll('.edit-project-btn').forEach(btn => {
+                    btn.addEventListener('click', () => editProject(btn.dataset.id));
+                });
+                
+                document.querySelectorAll('.delete-project-btn').forEach(btn => {
+                    btn.addEventListener('click', () => deleteProject(btn.dataset.id));
+                });
+                
+            } catch (error) {
+                showToast('Error loading projects: ' + error.message, 'error');
+            }
+        }
+        
+        // Add Project Button
+        addProjectBtn.addEventListener('click', () => {
+            projectForm.classList.remove('hidden');
+            document.getElementById('projectFormTitle').textContent = 'Add New Project';
+            addProjectForm.reset();
+            document.getElementById('imagePreview').classList.add('hidden');
+            document.getElementById('projectId').value = '';
+            editingProjectId = null;
+        });
+        
+        // Cancel Project Button
+        cancelProjectBtn.addEventListener('click', () => {
+            projectForm.classList.add('hidden');
+        });
+        
+        // Project Image Preview
+        document.getElementById('projectImage').addEventListener('change', function() {
+            const preview = document.getElementById('imagePreview');
+            const previewImg = document.getElementById('previewImg');
+            
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    preview.classList.remove('hidden');
+                };
+                
+                reader.readAsDataURL(this.files[0]);
+            } else {
+                preview.classList.add('hidden');
+            }
+        });
+        
+        // Add/Edit Project Form
+        addProjectForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const title = document.getElementById('projectTitle').value;
+            const description = document.getElementById('projectDescription').value;
+            const technologies = document.getElementById('projectTechnologies').value.split(',').map(tech => tech.trim());
+            const link = document.getElementById('projectLink').value;
+            const imageFile = document.getElementById('projectImage').files[0];
+            const projectId = document.getElementById('projectId').value;
+            
+            try {
+                let imageUrl = '';
+                
+                // Upload image if provided
+                if (imageFile) {
+                    const storageRef = storage.ref(`projects/${Date.now()}_${imageFile.name}`);
+                    const uploadTask = await storageRef.put(imageFile);
+                    imageUrl = await uploadTask.ref.getDownloadURL();
+                } else if (projectId) {
+                    // If editing and no new image, keep the old one
+                    const projectDoc = await db.collection('projects').doc(projectId).get();
+                    if (projectDoc.exists) {
+                        imageUrl = projectDoc.data().imageUrl;
+                    }
+                }
+                
+                if (projectId) {
+                    // Update existing project
+                    await db.collection('projects').doc(projectId).update({
+                        title,
+                        description,
+                        technologies,
+                        link,
+                        imageUrl,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    showToast('Project updated successfully!');
+                } else {
+                    // Add new project
+                    await db.collection('projects').add({
+                        title,
+                        description,
+                        technologies,
+                        link,
+                        imageUrl,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    showToast('Project added successfully!');
+                }
+                
+                projectForm.classList.add('hidden');
+                loadProjects();
+                loadPublicProjects();
+                updateProjectCount();
+                
+            } catch (error) {
+                showToast('Error saving project: ' + error.message, 'error');
+            }
+        });
+        
+        // Edit Project
+        async function editProject(id) {
+            try {
+                const projectDoc = await db.collection('projects').doc(id).get();
+                
+                if (projectDoc.exists) {
+                    const project = projectDoc.data();
+                    
+                    projectForm.classList.remove('hidden');
+                    document.getElementById('projectFormTitle').textContent = 'Edit Project';
+                    document.getElementById('projectTitle').value = project.title;
+                    document.getElementById('projectDescription').value = project.description;
+                    document.getElementById('projectTechnologies').value = project.technologies.join(', ');
+                    document.getElementById('projectLink').value = project.link || '';
+                    document.getElementById('projectId').value = id;
+                    editingProjectId = id;
+                    
+                    if (project.imageUrl) {
+                        document.getElementById('previewImg').src = project.imageUrl;
+                        document.getElementById('imagePreview').classList.remove('hidden');
+                    } else {
+                        document.getElementById('imagePreview').classList.add('hidden');
+                    }
+                }
+            } catch (error) {
+                showToast('Error loading project: ' + error.message, 'error');
+            }
+        }
+        
+        // Delete Project
+        async function deleteProject(id) {
+            if (confirm('Are you sure you want to delete this project?')) {
+                try {
+                    await db.collection('projects').doc(id).delete();
+                    showToast('Project deleted successfully!');
+                    loadProjects();
+                    loadPublicProjects();
+                    updateProjectCount();
+                } catch (error) {
+                    showToast('Error deleting project: ' + error.message, 'error');
+                }
+            }
+        }
+        
+        // Load Public Projects
+        async function loadPublicProjects() {
+            try {
+                const snapshot = await db.collection('projects').orderBy('createdAt', 'desc').get();
+                
+                projectsGrid.innerHTML = '';
+                
+                if (snapshot.empty) {
+                    projectsGrid.innerHTML = '<p class="col-span-full text-gray-400 text-center py-10">No projects yet. Check back soon!</p>';
+                    return;
+                }
+                
+                snapshot.forEach(doc => {
+                    const project = doc.data();
+                    const projectCard = document.createElement('div');
+                    projectCard.className = 'project-card reveal';
+                    
+                    projectCard.innerHTML = `
+                        <img src="${project.imageUrl || 'https://picsum.photos/seed/project' + doc.id + '/600/400'}" alt="${project.title}" class="project-image">
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold mb-2">${project.title}</h3>
+                            <p class="text-gray-400 mb-4 line-clamp-2">${project.description}</p>
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                ${project.technologies.map(tech => `<span class="px-2 py-1 bg-gray-800 rounded text-xs text-gray-300">${tech}</span>`).join('')}
+                            </div>
+                            ${project.link ? `<a href="${project.link}" target="_blank" class="inline-flex items-center text-blue-400 hover:text-blue-300">
+                                <i class="fas fa-external-link-alt mr-2"></i>View Project
+                            </a>` : ''}
+                        </div>
+                    `;
+                    
+                    projectsGrid.appendChild(projectCard);
+                });
+                
+                // Re-init scroll reveal for new elements
+                initScrollReveal();
+                
+            } catch (error) {
+                projectsGrid.innerHTML = '<p class="col-span-full text-red-400 text-center py-10">Error loading projects. Please try again later.</p>';
+            }
+        }
+        
+        // Update Project Count
+        async function updateProjectCount() {
+            try {
+                const snapshot = await db.collection('projects').get();
+                const count = snapshot.size;
+                
+                document.getElementById('projectsCount').textContent = count;
+            } catch (error) {
+                console.error('Error updating project count:', error);
+            }
+        }
+        
+        // Messages Management
+        async function loadMessages() {
+            try {
+                const snapshot = await db.collection('messages').orderBy('createdAt', 'desc').get();
+                
+                messagesList.innerHTML = '';
+                
+                if (snapshot.empty) {
+                    messagesList.innerHTML = '<p class="text-gray-400 text-center py-4">No messages yet.</p>';
+                    return;
+                }
+                
+                snapshot.forEach(doc => {
+                    const message = doc.data();
+                    const messageElement = document.createElement('div');
+                    messageElement.className = 'message-card';
+                    
+                    const date = message.createdAt ? new Date(message.createdAt.seconds * 1000).toLocaleString() : 'Unknown date';
+                    
+                    messageElement.innerHTML = `
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h4 class="font-bold">${message.name}</h4>
+                                <p class="text-gray-400 text-sm">${message.email}</p>
+                            </div>
+                            <span class="text-gray-500 text-sm">${date}</span>
+                        </div>
+                        <h5 class="font-medium mb-2">${message.subject}</h5>
+                        <p class="text-gray-400">${message.message}</p>
+                        <div class="mt-4 flex justify-end">
+                            <button class="delete-message-btn text-red-400 hover:text-red-300 text-sm" data-id="${doc.id}">
+                                <i class="fas fa-trash mr-1"></i>Delete
+                            </button>
+                        </div>
+                    `;
+                    
+                    messagesList.appendChild(messageElement);
+                });
+                
+                // Add event listeners to delete buttons
+                document.querySelectorAll('.delete-message-btn').forEach(btn => {
+                    btn.addEventListener('click', () => deleteMessage(btn.dataset.id));
+                });
+                
+            } catch (error) {
+                showToast('Error loading messages: ' + error.message, 'error');
+            }
+        }
+        
+        // Delete Message
+        async function deleteMessage(id) {
+            if (confirm('Are you sure you want to delete this message?')) {
+                try {
+                    await db.collection('messages').doc(id).delete();
+                    showToast('Message deleted successfully!');
+                    loadMessages();
+                } catch (error) {
+                    showToast('Error deleting message: ' + error.message, 'error');
+                }
+            }
+        }
+        
+        // Stats Management
+        async function loadStats() {
+            try {
+                const doc = await db.collection('settings').doc('stats').get();
+                
+                if (doc.exists) {
+                    const stats = doc.data();
+                    document.getElementById('clientsInput').value = stats.clients || 0;
+                    document.getElementById('yearsInput').value = stats.years || 0;
+                } else {
+                    document.getElementById('clientsInput').value = 0;
+                    document.getElementById('yearsInput').value = 0;
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+        
+        // Save Stats
+        statsForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const clients = parseInt(document.getElementById('clientsInput').value) || 0;
+            const years = parseInt(document.getElementById('yearsInput').value) || 0;
+            
+            try {
+                await db.collection('settings').doc('stats').set({
+                    clients,
+                    years
+                }, { merge: true });
+                
+                showToast('Stats saved successfully!');
+                loadPublicStats();
+            } catch (error) {
+                showToast('Error saving stats: ' + error.message, 'error');
+            }
+        });
+        
+        // Load Public Stats
+        async function loadPublicStats() {
+            try {
+                const doc = await db.collection('settings').doc('stats').get();
+                
+                if (doc.exists) {
+                    const stats = doc.data();
+                    document.getElementById('clientsCount').textContent = stats.clients || 0;
+                    document.getElementById('yearsCount').textContent = stats.years || 0;
+                } else {
+                    document.getElementById('clientsCount').textContent = 0;
+                    document.getElementById('yearsCount').textContent = 0;
+                }
+                
+                // Update project count
+                await updateProjectCount();
+            } catch (error) {
+                console.error('Error loading public stats:', error);
+            }
+        }
+        
+        // Settings Management
+        async function loadSettings() {
+            try {
+                const doc = await db.collection('settings').doc('content').get();
+                
+                if (doc.exists) {
+                    const settings = doc.data();
+                    document.getElementById('heroTitle').value = settings.heroTitle || '';
+                    document.getElementById('heroSubtitle').value = settings.heroSubtitle || '';
+                    document.getElementById('aboutText').value = settings.aboutText || '';
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error);
+            }
+        }
+        
+        // Save Settings
+        settingsForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const heroTitle = document.getElementById('heroTitle').value;
+            const heroSubtitle = document.getElementById('heroSubtitle').value;
+            const aboutText = document.getElementById('aboutText').value;
+            
+            try {
+                await db.collection('settings').doc('content').set({
+                    heroTitle,
+                    heroSubtitle,
+                    aboutText
+                }, { merge: true });
+                
+                showToast('Settings saved successfully!');
+                applySettings();
+            } catch (error) {
+                showToast('Error saving settings: ' + error.message, 'error');
+            }
+        });
+        
+        // Apply Settings to Public Pages
+        async function applySettings() {
+            try {
+                const doc = await db.collection('settings').doc('content').get();
+                
+                if (doc.exists) {
+                    const settings = doc.data();
+                    
+                    if (settings.heroTitle) {
+                        document.querySelector('#home h1').innerHTML = settings.heroTitle;
+                    }
+                    
+                    if (settings.heroSubtitle) {
+                        document.querySelector('#home p').textContent = settings.heroSubtitle;
+                    }
+                    
+                    if (settings.aboutText) {
+                        // This is a simple implementation, in a real app you might want more sophisticated HTML handling
+                        const aboutParagraphs = settings.aboutText.split('\n\n');
+                        const aboutTextContainer = document.querySelector('#about .reveal-left');
+                        const paragraphs = aboutTextContainer.querySelectorAll('p');
+                        
+                        aboutParagraphs.forEach((paragraph, index) => {
+                            if (paragraphs[index]) {
+                                paragraphs[index].textContent = paragraph;
+                            }
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error applying settings:', error);
+            }
+        }
+        
+        // Contact Form
+        contactForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const subject = document.getElementById('subject').value;
+            const message = document.getElementById('message').value;
+            
+            try {
+                await db.collection('messages').add({
+                    name,
+                    email,
+                    subject,
+                    message,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    read: false
+                });
+                
+                contactForm.reset();
+                showToast('Message sent successfully!');
+            } catch (error) {
+                showToast('Error sending message: ' + error.message, 'error');
+            }
+        });
+        
+        // Create Admin Account (Run once)
+        async function createAdminAccount() {
+            try {
+                // Check if admin account already exists
+                const adminDoc = await db.collection('users').where('email', '==', 'mnmjaasim@gmail.com').get();
+                
+                if (adminDoc.empty) {
+                    // Create admin account
+                    const userCredential = await auth.createUserWithEmailAndPassword('mnmjaasim@gmail.com', 'jaasim2010');
+                    
+                    // Set admin role
+                    await db.collection('users').doc(userCredential.user.uid).set({
+                        name: 'Admin',
+                        email: 'mnmjaasim@gmail.com',
+                        role: 'admin',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    // Sign out after creating admin
+                    await auth.signOut();
+                    
+                    console.log('Admin account created successfully!');
+                }
+            } catch (error) {
+                console.error('Error creating admin account:', error);
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initNeuralNetwork();
+            initScrollReveal();
+            loadPublicProjects();
+            loadPublicStats();
+            applySettings();
+            createAdminAccount();
+        });
+    </script>
+</body>
+</html>
